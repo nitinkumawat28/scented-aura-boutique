@@ -12,15 +12,15 @@ function CartPage() {
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-  const shipping = subtotal > 0 ? 15 : 0;
+  const shipping = subtotal > 0 ? 500 : 0;
 
   return (
     <div className="pt-32 pb-24">
       <div className="mx-auto max-w-[1200px] px-6 lg:px-12">
         <div className="text-center mb-16">
-          <span className="gold-divider mb-6">Votre Panier</span>
+          <span className="gold-divider mb-6">Your Basket</span>
           <h1 className="font-display text-5xl text-foreground">
-            Shopping <em className="font-serif italic">Bag</em>
+            Shopping <em className="font-serif italic">Basket</em>
           </h1>
         </div>
 
@@ -49,7 +49,7 @@ function CartPage() {
                     <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground mt-2">
                       {item.size}
                     </p>
-                    <p className="text-sm text-foreground mt-3">${item.price}</p>
+                    <p className="text-sm text-foreground mt-3">₹{item.price}</p>
                     <div className="flex items-center border border-border w-fit mt-5">
                       <button
                         onClick={() => setQty(item.id, item.qty - 1)}
@@ -77,7 +77,7 @@ function CartPage() {
                       <X size={16} strokeWidth={1.4} />
                     </button>
                     <p className="font-display text-lg text-foreground">
-                      ${item.price * item.qty}
+                      ₹{item.price * item.qty}
                     </p>
                   </div>
                 </div>
@@ -102,15 +102,15 @@ function CartPage() {
               <dl className="space-y-3 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <dt>Subtotal</dt>
-                  <dd>${subtotal}</dd>
+                  <dd>₹{subtotal}</dd>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <dt>Shipping</dt>
-                  <dd>${shipping}</dd>
+                  <dd>₹{shipping}</dd>
                 </div>
                 <div className="flex justify-between pt-4 border-t border-border text-foreground font-display text-lg">
                   <dt>Total</dt>
-                  <dd>${subtotal + shipping}</dd>
+                  <dd>₹{subtotal + shipping}</dd>
                 </div>
               </dl>
 

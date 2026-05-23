@@ -10,7 +10,7 @@ export function Footer() {
             THE SCENTED AURA
           </div>
           <div className="text-[10px] tracking-[0.4em] text-[var(--color-gold-deep)] mt-1">
-            — MAISON DE PARFUM —
+            — HOUSE OF PERFUME —
           </div>
           <p className="mt-6 text-sm text-muted-foreground leading-relaxed font-serif italic">
             Handcrafted fragrances inspired by nature, elegance, and the
@@ -20,7 +20,7 @@ export function Footer() {
 
         <div>
           <h4 className="text-xs uppercase tracking-[0.3em] text-foreground mb-5">
-            Maison
+            House
           </h4>
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li><Link to="/about" className="hover:text-foreground transition-colors">Our Story</Link></li>
@@ -44,7 +44,7 @@ export function Footer() {
 
         <div>
           <h4 className="text-xs uppercase tracking-[0.3em] text-foreground mb-5">
-            Le Journal
+            The Journal
           </h4>
           <p className="text-sm text-muted-foreground mb-4 font-serif italic">
             Receive private editions, news, and rituals.

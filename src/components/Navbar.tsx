@@ -1,7 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Search, ShoppingBag, User, Menu, X, Heart, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
+import { useWishlist } from "@/store/wishlist";
+import { useUser } from "@/store/user";
 
 const links = [
   { to: "/", label: "Home" },
@@ -14,8 +16,12 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const navigate = useNavigate();
   const count = useCart((s) => s.items.reduce((n, i) => n + i.qty, 0));
+  const wishlistCount = useWishlist((s) => s.items.length);
+  const user = useUser((s) => s.user);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -24,7 +30,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+    setSearchOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -48,7 +57,7 @@ export function Navbar() {
             THE SCENTED AURA
           </div>
           <div className="hidden md:block text-[10px] tracking-[0.4em] text-[var(--color-gold-deep)] mt-0.5">
-            — MAISON DE PARFUM —
+            — HOUSE OF PERFUME —
           </div>
         </Link>
 
@@ -65,12 +74,30 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-5 text-foreground">
-          <button aria-label="Search" className="hover:text-[var(--color-gold-hover)] transition-colors">
-            <Search size={18} strokeWidth={1.4} />
-          </button>
-          <button aria-label="Account" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
+          {searchOpen ? (
+            <form onSubmit={(e) => { e.preventDefault(); navigate({ to: '/shop' }); setSearchOpen(false); }} className="flex items-center border-b border-foreground/50 pb-1 mr-2 animate-in fade-in slide-in-from-right-4">
+               <input autoFocus type="text" placeholder="Search..." className="bg-transparent outline-none text-sm w-32 md:w-48 text-foreground" />
+               <button type="button" onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground"><X size={14} /></button>
+            </form>
+          ) : (
+            <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:text-[var(--color-gold-hover)] transition-colors">
+              <Search size={18} strokeWidth={1.4} />
+            </button>
+          )}
+          <Link to="/admin" aria-label="Admin Dashboard" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
+            <Settings size={18} strokeWidth={1.4} />
+          </Link>
+          <Link to={user ? "/profile" : "/login"} aria-label="Account" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
             <User size={18} strokeWidth={1.4} />
-          </button>
+          </Link>
+          <Link to="/wishlist" className="relative hover:text-[var(--color-gold-hover)] transition-colors" aria-label="Wishlist">
+            <Heart size={18} strokeWidth={1.4} />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-2 -right-2 text-[10px] bg-[var(--color-gold-deep)] text-cream rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
           <Link to="/cart" className="relative hover:text-[var(--color-gold-hover)] transition-colors" aria-label="Cart">
             <ShoppingBag size={18} strokeWidth={1.4} />
             {count > 0 && (

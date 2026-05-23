@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import heroImg from "@/assets/hero-perfume.jpg";
 import storyImg from "@/assets/brand-story.jpg";
 import { ProductCard } from "@/components/ProductCard";
-import { products } from "@/data/products";
+import { useProductStore } from "@/store/products";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const products = useProductStore((s) => s.products);
+
   return (
     <>
       {/* HERO */}
@@ -29,7 +31,7 @@ function HomePage() {
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             className="order-2 lg:order-1"
           >
-            <span className="gold-divider mb-8">Maison de Parfum</span>
+            <span className="gold-divider mb-8">House of Perfume</span>
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
               Discover the
               <br />
@@ -70,9 +72,9 @@ function HomePage() {
               <div className="absolute -bottom-4 -left-4 hidden md:block">
                 <div className="bg-[var(--color-cream)] border border-border px-6 py-4 shadow-[var(--shadow-soft)]">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-deep)]">
-                    Nouveau · 2026
+                    New · 2026
                   </p>
-                  <p className="font-display text-lg text-foreground">Amber Noir</p>
+                  <p className="font-display text-lg text-foreground">Dark Amber</p>
                 </div>
               </div>
             </div>
@@ -140,7 +142,7 @@ function HomePage() {
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.15 }}
           >
-            <span className="gold-divider mb-6">Notre Histoire</span>
+            <span className="gold-divider mb-6">Our Story</span>
             <h2 className="font-display text-4xl md:text-5xl leading-tight text-foreground">
               The art of slow
               <br />
@@ -168,7 +170,7 @@ function HomePage() {
       {/* NEWSLETTER */}
       <section className="py-32">
         <div className="mx-auto max-w-2xl px-6 text-center">
-          <span className="gold-divider mb-6">Le Journal</span>
+          <span className="gold-divider mb-6">The Journal</span>
           <h2 className="font-display text-3xl md:text-4xl text-foreground">
             Letters from the <em className="font-serif italic">atelier</em>
           </h2>

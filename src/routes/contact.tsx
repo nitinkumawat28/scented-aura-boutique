@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Instagram, Facebook, Twitter } from "lucide-react";
+import { useSiteInfoStore } from "@/store/siteInfo";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -12,13 +13,23 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
-const cards = [
-  { icon: MapPin, label: "Boutique", lines: ["18 Rue des Archives", "75004 Paris, France"] },
-  { icon: Mail, label: "Correspondence", lines: ["bonjour@scentedaura.com", "press@scentedaura.com"] },
-  { icon: Phone, label: "Téléphone", lines: ["+33 1 42 76 18 04", "Tuesday — Saturday"] },
-];
-
 function ContactPage() {
+  const { 
+    contactTitle, 
+    contactSubtitle, 
+    contactBody, 
+    locationUrl,
+    boutiqueAddress, 
+    correspondenceEmails, 
+    phoneLines 
+  } = useSiteInfoStore();
+
+  const cards = [
+    { icon: MapPin, label: "Boutique", lines: boutiqueAddress },
+    { icon: Mail, label: "Correspondence", lines: correspondenceEmails },
+    { icon: Phone, label: "Téléphone", lines: phoneLines },
+  ];
+
   return (
     <div className="pt-32 pb-24">
       <div className="mx-auto max-w-[1200px] px-6 lg:px-12">
@@ -30,11 +41,10 @@ function ContactPage() {
         >
           <span className="gold-divider mb-6">Contactez-nous</span>
           <h1 className="font-display text-5xl md:text-6xl text-foreground">
-            Come <em className="font-serif italic">closer</em>
+            {contactTitle} <em className="font-serif italic">{contactSubtitle}</em>
           </h1>
           <p className="mt-5 max-w-xl mx-auto font-serif italic text-muted-foreground">
-            We answer every letter personally. Visit us in Paris, or write —
-            we delight in the slow art of conversation.
+            {contactBody}
           </p>
         </motion.div>
 
@@ -94,13 +104,28 @@ function ContactPage() {
 
           <div className="space-y-8">
             <div className="aspect-[4/3] bg-[var(--color-secondary)] border border-border overflow-hidden flex items-center justify-center">
-              <div className="text-center">
-                <MapPin size={28} strokeWidth={1.1} className="mx-auto text-[var(--color-gold-hover)]" />
-                <p className="font-display text-xl mt-3 text-foreground">Le Marais, Paris</p>
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mt-2">
-                  18 Rue des Archives
-                </p>
-              </div>
+              {locationUrl ? (
+                <a 
+                  href={locationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="block w-full h-full flex flex-col items-center justify-center hover:bg-muted/20 transition-colors group cursor-pointer"
+                >
+                  <MapPin size={28} strokeWidth={1.1} className="mx-auto text-[var(--color-gold-hover)] group-hover:scale-110 transition-transform duration-300" />
+                  <p className="font-display text-xl mt-3 text-foreground">View on Map</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-gold-deep)] mt-2 font-medium">
+                    Click to open location
+                  </p>
+                </a>
+              ) : (
+                <div className="text-center">
+                  <MapPin size={28} strokeWidth={1.1} className="mx-auto text-[var(--color-gold-hover)]" />
+                  <p className="font-display text-xl mt-3 text-foreground">Le Marais, Paris</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mt-2">
+                    {boutiqueAddress[0] || "18 Rue des Archives"}
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <h3 className="font-display text-2xl text-foreground mb-5">

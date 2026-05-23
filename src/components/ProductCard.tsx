@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import type { Product } from "@/data/products";
+import type { Product } from "@/store/products";
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   return (
@@ -36,7 +36,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             {product.tagline}
           </p>
           <p className="text-sm text-foreground pt-2 tracking-wider">
-            ${product.price}
+            ₹{product.price}
           </p>
         </div>
       </Link>

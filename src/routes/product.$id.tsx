@@ -2,13 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import { getProduct, products } from "@/data/products";
+import { useProductStore } from "@/store/products";
 import { useCart } from "@/store/cart";
+import { useWishlist } from "@/store/wishlist";
 import { ProductCard } from "@/components/ProductCard";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    const product = getProduct(params.id);
+    const product = useProductStore.getState().products.find(p => p.id.toString() === params.id);
     if (!product) throw notFound();
     return { product };
   },
@@ -28,8 +29,11 @@ export const Route = createFileRoute("/product/$id")({
 
 function ProductPage() {
   const { product } = Route.useLoaderData();
+  const products = useProductStore((s) => s.products);
   const [qty, setQty] = useState(1);
   const add = useCart((s) => s.add);
+  const toggleWishlist = useWishlist((s) => s.toggle);
+  const hasWishlisted = useWishlist((s) => s.has(product.id));
 
   const onAdd = () => {
     for (let i = 0; i < qty; i++) {
@@ -82,11 +86,11 @@ function ProductPage() {
               {product.description}
             </p>
             <p className="mt-10 text-2xl font-display text-foreground tracking-wider">
-              ${product.price}
+              ₹{product.price}
             </p>
 
-            <div className="mt-10 flex items-center gap-5">
-              <div className="flex items-center border border-border">
+            <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-5">
+              <div className="flex justify-center items-center border border-border">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="px-4 py-3 hover:text-[var(--color-gold-hover)] transition-colors"
@@ -109,8 +113,12 @@ function ProductPage() {
               </button>
             </div>
 
-            <button className="mt-4 luxury-link text-foreground inline-flex items-center gap-2">
-              <Heart size={14} strokeWidth={1.4} /> Add to Wishlist
+            <button 
+              onClick={() => toggleWishlist(product.id)}
+              className="mt-4 luxury-link text-foreground inline-flex items-center gap-2"
+            >
+              <Heart size={14} strokeWidth={1.4} fill={hasWishlisted ? "currentColor" : "none"} /> 
+              {hasWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
             </button>
 
             {/* Notes */}
@@ -135,12 +143,12 @@ function ProductPage() {
         {/* Related */}
         <div className="mt-32">
           <div className="text-center mb-16">
-            <span className="gold-divider mb-6">Vous aimerez aussi</span>
+            <span className="gold-divider mb-6">You may also like</span>
             <h2 className="font-display text-3xl md:text-4xl text-foreground">
               You may also <em className="font-serif italic">cherish</em>
             </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {products.filter((p) => p.id !== product.id).slice(0, 3).map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}

@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -74,10 +75,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The Scented Aura — Maison de Parfum" },
+      { title: "The Scented Aura — House of Perfume" },
       { name: "description", content: "Handcrafted luxury fragrances inspired by nature, elegance, and timeless artistry." },
       { name: "author", content: "The Scented Aura" },
-      { property: "og:title", content: "The Scented Aura — Maison de Parfum" },
+      { property: "og:title", content: "The Scented Aura — House of Perfume" },
       { property: "og:description", content: "Handcrafted luxury fragrances inspired by nature, elegance, and timeless artistry." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -112,14 +113,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
-      <main className="min-h-screen">
+      {!isAdmin && <Navbar />}
+      <main className={isAdmin ? "min-h-screen bg-[var(--color-secondary)]/30" : "min-h-screen"}>
         <Outlet />
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
     </QueryClientProvider>
   );
 }
