@@ -117,6 +117,19 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
+            <div className="h-px bg-border/60 my-2" />
+            <Link 
+              to={user ? "/profile" : "/login"} 
+              className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm"
+            >
+              <User size={16} strokeWidth={1.4} /> {user ? "My Profile" : "Sign In / Register"}
+            </Link>
+            <Link 
+              to="/admin" 
+              className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm"
+            >
+              <Settings size={16} strokeWidth={1.4} /> Admin Dashboard
+            </Link>
           </nav>
         </div>
       )}
