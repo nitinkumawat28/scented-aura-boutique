@@ -9,37 +9,42 @@ import { ProductCard } from "@/components/ProductCard";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    const product = useProductStore.getState().products.find(p => p.id.toString() === params.id);
-    if (!product) throw notFound();
-    return { product };
+    return { id: params.id };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.product.name} — The Scented Aura` },
-          { name: "description", content: loaderData.product.description },
-          { property: "og:title", content: `${loaderData.product.name} — The Scented Aura` },
-          { property: "og:description", content: loaderData.product.description },
-          { property: "og:image", content: loaderData.product.image },
-        ]
-      : [],
+  head: ({ params }) => ({
+    meta: [
+      { title: `Luxury Fragrance — The Scented Aura` },
+      { name: "description", content: "Discover handcrafted luxury perfumes." },
+    ],
   }),
   component: ProductPage,
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { id } = Route.useLoaderData();
+  const product = useProductStore((s) => s.products.find(p => p.id.toString() === id));
   const products = useProductStore((s) => s.products);
   const [qty, setQty] = useState(1);
   const add = useCart((s) => s.add);
   const toggleWishlist = useWishlist((s) => s.toggle);
-  const hasWishlisted = useWishlist((s) => s.has(product.id));
+  const hasWishlisted = useWishlist((s) => s.has(id));
+
+  if (!product) {
+    return (
+      <div className="pt-48 pb-24 text-center">
+        <p className="font-serif italic text-muted-foreground text-lg animate-pulse">
+          Unveiling olfactory notes...
+        </p>
+      </div>
+    );
+  }
 
   const onAdd = () => {
     for (let i = 0; i < qty; i++) {
       add({ id: product.id, name: product.name, price: product.price, image: product.image, size: "100ml" });
     }
   };
+
 
   return (
     <div className="pt-32 pb-24">

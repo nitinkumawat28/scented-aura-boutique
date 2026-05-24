@@ -167,3 +167,8 @@ INSERT INTO public.orders (id, customer, created_at, total, status, items) VALUE
 ('ORD-1156', 'Neha Gupta', '2026-05-15 16:45:00+00', 32000, 'Pending', 3)
 ON CONFLICT (id) DO NOTHING;
 
+-- Enable Realtime for products and orders tables
+alter publication supabase_realtime add table public.products;
+alter publication supabase_realtime add table public.orders;
+
+

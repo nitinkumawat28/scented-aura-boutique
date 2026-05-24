@@ -77,6 +77,8 @@ function AdminPage() {
   const [newCat, setNewCat] = useState("Oriental");
   const [newPrice, setNewPrice] = useState("");
   const [newStock, setNewStock] = useState("");
+  const [newTagline, setNewTagline] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -166,6 +168,8 @@ function AdminPage() {
         category: newCat,
         price: Number(newPrice) || 0,
         stock: Number(newStock) || 0,
+        tagline: newTagline,
+        description: newDescription,
         ...(imageUrl && { image: imageUrl }),
       });
     } else {
@@ -174,6 +178,8 @@ function AdminPage() {
         category: newCat,
         price: Number(newPrice) || 0,
         stock: Number(newStock) || 0,
+        tagline: newTagline,
+        description: newDescription,
         ...(imageUrl && { image: imageUrl }),
       });
     }
@@ -181,6 +187,8 @@ function AdminPage() {
     setNewName("");
     setNewPrice("");
     setNewStock("");
+    setNewTagline("");
+    setNewDescription("");
     setNewCat("Oriental");
     setMediaFiles([]);
     setShowUpload(false);
@@ -364,6 +372,14 @@ function AdminPage() {
                         <input type="number" value={newStock} onChange={(e) => setNewStock(e.target.value)} className="w-full bg-transparent border border-border px-4 py-3 outline-none focus:border-[var(--color-gold)] text-foreground" />
                       </div>
                     </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">Tagline (Short Description)</label>
+                      <input type="text" value={newTagline} onChange={(e) => setNewTagline(e.target.value)} className="w-full bg-transparent border border-border px-4 py-3 outline-none focus:border-[var(--color-gold)] text-foreground" />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">Long Description</label>
+                      <textarea rows={3} value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="w-full bg-transparent border border-border px-4 py-3 outline-none focus:border-[var(--color-gold)] text-foreground resize-none" />
+                    </div>
                   </div>
                   
                   <div className="space-y-5">
@@ -445,6 +461,8 @@ function AdminPage() {
                             setNewCat(p.category);
                             setNewPrice(p.price.toString());
                             setNewStock(p.stock?.toString() || "0");
+                            setNewTagline(p.tagline || "");
+                            setNewDescription(p.description || "");
                             setShowUpload(true);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
