@@ -722,6 +722,27 @@ function AdminPage() {
                   </div>
                 </div>
 
+                {/* Itemized Invoice Receipt List */}
+                {selectedOrder.products && selectedOrder.products.length > 0 && (
+                  <div className="border-t border-border pt-5 mt-5">
+                    <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3.5 font-semibold">Items Ordered</h4>
+                    <div className="space-y-3 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                      {selectedOrder.products.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-xs bg-muted/20 p-3 border border-border">
+                          <div>
+                            <span className="font-semibold text-foreground">{item.name}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider ml-2">({item.size})</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-muted-foreground mr-3">{item.qty} × ₹{item.price.toLocaleString()}</span>
+                            <span className="font-semibold text-foreground">₹{(item.qty * item.price).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="border-t border-border pt-6 mt-8 flex flex-col items-center justify-between gap-4">
                   <div className="w-full flex justify-between items-center bg-muted/20 p-4 border border-border">
                     <span className="font-display uppercase tracking-widest text-xs text-muted-foreground">Total Amount Paid</span>

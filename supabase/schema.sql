@@ -140,7 +140,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     total INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'Pending',
-    items INTEGER NOT NULL DEFAULT 1
+    items INTEGER NOT NULL DEFAULT 1,
+    products JSONB NOT NULL DEFAULT '[]'::jsonb
 );
 
 -- Enable Row Level Security (RLS)
@@ -160,11 +161,11 @@ USING (true)
 WITH CHECK (true);
 
 -- Seed mock order history
-INSERT INTO public.orders (id, customer, created_at, total, status, items) VALUES
-('ORD-1092', 'Aarav Sharma', '2026-04-12 10:00:00+00', 10500, 'Delivered', 1),
-('ORD-1154', 'Priya Patel', '2026-05-02 12:30:00+00', 20500, 'Processing', 2),
-('ORD-1155', 'Rahul Verma', '2026-05-14 14:15:00+00', 15500, 'Shipped', 1),
-('ORD-1156', 'Neha Gupta', '2026-05-15 16:45:00+00', 32000, 'Pending', 3)
+INSERT INTO public.orders (id, customer, created_at, total, status, items, products) VALUES
+('ORD-1092', 'Aarav Sharma', '2026-04-12 10:00:00+00', 10500, 'Delivered', 3, '[{"id": "varanasi-rose", "name": "Varanasi Rose", "price": 3500, "qty": 3, "size": "100ml"}]'::jsonb),
+('ORD-1154', 'Priya Patel', '2026-05-02 12:30:00+00', 20500, 'Processing', 6, '[{"id": "kashmiri-saffron", "name": "Kashmiri Saffron", "price": 3500, "qty": 5, "size": "100ml"}, {"id": "royal-oud", "name": "Royal Oud", "price": 3000, "qty": 1, "size": "100ml"}]'::jsonb),
+('ORD-1155', 'Rahul Verma', '2026-05-14 14:15:00+00', 15500, 'Shipped', 5, '[{"id": "mysore-sandalwood", "name": "Mysore Sandalwood", "price": 3100, "qty": 5, "size": "100ml"}]'::jsonb),
+('ORD-1156', 'Neha Gupta', '2026-05-15 16:45:00+00', 32000, 'Pending', 3, '[{"id": "royal-oud", "name": "Royal Oud", "price": 10000, "qty": 1, "size": "100ml"}, {"id": "varanasi-rose", "name": "Varanasi Rose", "price": 11000, "qty": 1, "size": "100ml"}, {"id": "kashmiri-saffron", "name": "Kashmiri Saffron", "price": 11000, "qty": 1, "size": "100ml"}]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
 
 -- Enable Realtime for products and orders tables

@@ -1,5 +1,13 @@
 import { supabase } from "@/lib/supabase";
 
+export interface OrderProduct {
+  id: string;
+  name: string;
+  price: number;
+  qty: number;
+  size: string;
+}
+
 export interface Order {
   id: string;
   customer: string;
@@ -7,6 +15,7 @@ export interface Order {
   total: number;
   status: string;
   items: number;
+  products?: OrderProduct[];
 }
 
 export const orderService = {
