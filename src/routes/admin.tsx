@@ -79,6 +79,7 @@ function AdminPage() {
   const [newStock, setNewStock] = useState("");
   const [newTagline, setNewTagline] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -536,7 +537,12 @@ function AdminPage() {
                         </select>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <button className="text-[var(--color-gold-deep)] hover:underline uppercase tracking-widest text-[10px] font-bold">View</button>
+                        <button 
+                          onClick={() => setSelectedOrder(o)}
+                          className="text-[var(--color-gold-deep)] hover:underline uppercase tracking-widest text-[10px] font-bold"
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -650,6 +656,85 @@ function AdminPage() {
               >
                 {isSiteInfoSaved ? "Settings Saved Successfully" : "Save Information"}
               </button>
+            </div>
+          </div>
+        )}
+        {/* ORDER DETAILS MODAL */}
+        {selectedOrder && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-[var(--color-cream)] border border-border p-8 md:p-10 shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-300">
+              <button 
+                onClick={() => setSelectedOrder(null)} 
+                className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-colors outline-none"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="text-center mb-8 border-b border-border pb-6">
+                <span className="text-[10px] tracking-[0.4em] uppercase text-[var(--color-gold-deep)] font-semibold">Receipt / Invoice</span>
+                <h3 className="font-display text-3xl text-foreground mt-2">Order Details</h3>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">ID: {selectedOrder.id}</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6 text-sm">
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Customer</h4>
+                    <p className="font-medium text-foreground">{selectedOrder.customer}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Order Date</h4>
+                    <p className="font-medium text-foreground">
+                      {new Date(selectedOrder.created_at || selectedOrder.date).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 text-sm border-t border-border pt-5">
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Order Status</h4>
+                    <select
+                      value={selectedOrder.status}
+                      onChange={(e) => {
+                        updateOrderStatus(selectedOrder.id, e.target.value);
+                        setSelectedOrder({ ...selectedOrder, status: e.target.value });
+                      }}
+                      className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded border border-border bg-background outline-none cursor-pointer ${
+                        selectedOrder.status === "Delivered" ? "bg-green-50 text-green-700 border-green-200" :
+                        selectedOrder.status === "Shipped" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                        selectedOrder.status === "Processing" ? "bg-amber-50 text-amber-700 border-amber-200" :
+                        "bg-[var(--color-gold-deep)]/10 text-[var(--color-gold-deep)] border-[var(--color-gold-deep)]/20"
+                      }`}
+                    >
+                      <option value="Pending" className="text-foreground bg-background">Pending</option>
+                      <option value="Processing" className="text-foreground bg-background">Processing</option>
+                      <option value="Shipped" className="text-foreground bg-background">Shipped</option>
+                      <option value="Delivered" className="text-foreground bg-background">Delivered</option>
+                    </select>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total Items</h4>
+                    <p className="font-medium text-foreground">{selectedOrder.items} item(s) purchased</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-border pt-6 mt-8 flex flex-col items-center justify-between gap-4">
+                  <div className="w-full flex justify-between items-center bg-muted/20 p-4 border border-border">
+                    <span className="font-display uppercase tracking-widest text-xs text-muted-foreground">Total Amount Paid</span>
+                    <span className="font-display text-2xl text-foreground tracking-wider font-semibold">₹{selectedOrder.total.toLocaleString()}</span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedOrder(null)}
+                    className="btn-luxury w-full py-3.5 text-xs uppercase tracking-widest mt-2"
+                  >
+                    Close Invoice View
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
