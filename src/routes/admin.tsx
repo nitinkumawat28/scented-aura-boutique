@@ -52,7 +52,7 @@ function AdminPage() {
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showUpload, setShowUpload] = useState(false);
-  const [editingProductId, setEditingProductId] = useState<string | number | null>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);

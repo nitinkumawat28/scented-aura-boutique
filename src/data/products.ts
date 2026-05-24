@@ -1,139 +1,157 @@
-import p1 from "@/assets/product-1.jpg";
-import p2 from "@/assets/product-2.jpg";
-import p3 from "@/assets/product-3.jpg";
-import p4 from "@/assets/product-4.jpg";
+import royalOud from "@/assets/products/royal-oud.png";
+import kashmiriSaffron from "@/assets/products/kashmiri-saffron.png";
+import mograAbsolute from "@/assets/products/mogra-absolute.png";
+import mysoreSandalwood from "@/assets/products/mysore-sandalwood.png";
+import darjeelingTea from "@/assets/products/darjeeling-tea.png";
+import malabarSpice from "@/assets/products/malabar-spice.png";
+import monsoonRain from "@/assets/products/monsoon-rain.png";
+import varanasiRose from "@/assets/products/varanasi-rose.png";
 
 export interface Product {
   id: string;
   name: string;
-  tagline: string;
-  description: string;
   price: number;
-  image: string;
+  tagline: string; // Short Description
+  description: string; // Long Description
   category: string;
-  notes: { top: string[]; heart: string[]; base: string[] };
+  image: string;
+  notes: {
+    top: string[];
+    heart: string[];
+    base: string[];
+  };
+  stock: number;
+  featured: boolean;
 }
 
 export const products: Product[] = [
   {
-    id: "dark-amber",
-    name: "Dark Amber",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "A warm, enveloping amber composition layered with smoked vanilla and aged sandalwood. An ode to candlelit evenings.",
-    price: 15500,
-    image: p1,
-    category: "Oriental",
+    id: "royal-oud",
+    name: "Royal Oud",
+    price: 2999,
+    tagline: "Warm woody fragrance",
+    description: "A majestic blend of deep agarwood (oud) layered with velvety red rose and warm rich amber, evoking the timeless grandeur of royal palaces.",
+    category: "Signature",
+    image: royalOud,
     notes: {
-      top: ["Bergamot", "Pink Pepper", "Cardamom"],
-      heart: ["Rose Absolute", "Saffron", "Iris"],
-      base: ["Amber", "Sandalwood", "Vanilla Bourbon"],
+      top: ["Oud", "Saffron"],
+      heart: ["Rose", "Geranium"],
+      base: ["Amber", "Sandalwood"]
     },
+    stock: 45,
+    featured: true
   },
   {
-    id: "violet-dusk",
-    name: "Violet Dusk",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "Powdered violets bloom against a backdrop of dried lavender and warm leather, recalling old Parisian boudoirs.",
-    price: 17500,
-    image: p2,
+    id: "kashmiri-saffron",
+    name: "Kashmiri Saffron",
+    price: 3499,
+    tagline: "Exotic spicy floral",
+    description: "Deep saffron and golden honey from the valleys. An elegant composition of handpicked Kashmiri saffron steeped in warm wild honey and rich sandalwood.",
+    category: "Exotic",
+    image: kashmiriSaffron,
+    notes: {
+      top: ["Saffron", "Ginger"],
+      heart: ["Honey", "Jasmine"],
+      base: ["Sandalwood", "Patchouli"]
+    },
+    stock: 30,
+    featured: true
+  },
+  {
+    id: "mogra-absolute",
+    name: "Mogra Absolute",
+    price: 2799,
+    tagline: "Radiant white floral",
+    description: "Night-blooming Indian jasmine and fresh greens. A rich, intoxicating bouquet of fresh Mogra flowers harvested at dusk, balanced with delicate white musk.",
     category: "Floral",
+    image: mograAbsolute,
     notes: {
-      top: ["Lavender", "Bergamot", "Violet Leaf"],
-      heart: ["Violet", "Heliotrope", "Orris"],
-      base: ["Suede", "Tonka Bean", "Cedarwood"],
+      top: ["Green Leaves", "Neroli"],
+      heart: ["Jasmine Mogra", "Tuberose"],
+      base: ["White Musk", "Cedarwood"]
     },
+    stock: 55,
+    featured: true
   },
   {
-    id: "golden-honey",
-    name: "Golden Honey",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "Golden honey drizzled over sun-warmed neroli and beeswax. Soft, radiant, and quietly opulent.",
-    price: 14000,
-    image: p3,
-    category: "Gourmand",
-    notes: {
-      top: ["Neroli", "Orange Blossom", "Mandarin"],
-      heart: ["Honey", "Jasmine", "Mimosa"],
-      base: ["Beeswax", "Tonka", "Musk"],
-    },
-  },
-  {
-    id: "heritage-rose",
-    name: "Heritage Rose",
-    tagline: "Extrait de Parfum · 50ml",
-    description:
-      "A heritage rose chypre laced with dried petals, oud, and patchouli. Timeless, regal, unforgettable.",
-    price: 20500,
-    image: p4,
-    category: "Chypre",
-    notes: {
-      top: ["Bulgarian Rose", "Lychee", "Pear"],
-      heart: ["Damask Rose", "Peony", "Magnolia"],
-      base: ["Oud", "Patchouli", "White Musk"],
-    },
-  },
-  {
-    id: "precious-oud",
-    name: "Precious Oud",
-    tagline: "Extrait de Parfum · 50ml",
-    description:
-      "Deep, rich agarwood blended with spicy saffron and dark chocolate notes. A scent of pure royalty.",
-    price: 22000,
-    image: p1,
-    category: "Oriental",
-    notes: {
-      top: ["Saffron", "Nutmeg", "Lavender"],
-      heart: ["Agarwood", "Dark Chocolate", "Rose"],
-      base: ["Patchouli", "Musk", "Incense"],
-    },
-  },
-  {
-    id: "night-jasmine",
-    name: "Night Jasmine",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "The intoxicating scent of jasmine blooming under moonlight, softened by creamy almond and white woods.",
-    price: 16000,
-    image: p2,
-    category: "Floral",
-    notes: {
-      top: ["Almond", "Blackcurrant", "Green Leaves"],
-      heart: ["Night-Blooming Jasmine", "Tuberose", "Lily of the Valley"],
-      base: ["White Woods", "Vanilla", "Musk"],
-    },
-  },
-  {
-    id: "cedar-wood",
-    name: "Cedar Wood",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "Crisp, dry cedar wood enhanced by a touch of black pepper and vetiver. Grounding and intensely refined.",
-    price: 15000,
-    image: p3,
+    id: "mysore-sandalwood",
+    name: "Mysore Sandalwood",
+    price: 3899,
+    tagline: "Rich creamy woody",
+    description: "Sacred and grounding sandalwood with vanilla notes. Made with precious royal Mysore sandalwood, offering a smooth, creamy, woody aroma sweetened with vanilla.",
     category: "Woody",
+    image: mysoreSandalwood,
     notes: {
-      top: ["Black Pepper", "Grapefruit", "Coriander"],
-      heart: ["Cedarwood", "Vetiver", "Iris"],
-      base: ["Oakmoss", "Leather", "Amber"],
+      top: ["Cardamom", "Black Pepper"],
+      heart: ["Sandalwood", "Cedarwood"],
+      base: ["Vanilla Bourbon", "Amber"]
     },
+    stock: 25,
+    featured: true
   },
   {
-    id: "vine-flower",
-    name: "Vine Flower",
-    tagline: "Eau de Parfum · 100ml",
-    description:
-      "A refreshing burst of grape blossom, intertwined with green fig and light citrus notes.",
-    price: 18000,
-    image: p4,
-    category: "Floral",
+    id: "darjeeling-tea",
+    name: "Darjeeling Tea",
+    price: 2599,
+    tagline: "Fresh citrus aromatic",
+    description: "First flush black tea leaves and green bergamot. A refreshing and sophisticated aroma of freshly brewed black tea leaves mixed with bright, crisp Italian bergamot.",
+    category: "Fresh",
+    image: darjeelingTea,
     notes: {
-      top: ["Grapefruit", "Bergamot", "Lemon"],
-      heart: ["Vine Blossom", "Fig Leaf", "Rose Water"],
-      base: ["White Musk", "Cedar", "Vetiver"],
+      top: ["Bergamot", "Lemon"],
+      heart: ["Black Tea", "Maté"],
+      base: ["Vetiver", "White Musk"]
     },
+    stock: 60,
+    featured: false
+  },
+  {
+    id: "malabar-spice",
+    name: "Malabar Spice",
+    price: 2899,
+    tagline: "Warm exotic spicy",
+    description: "Black pepper and fresh cardamom from the coast. A vibrant, energizing blend of sun-baked black peppercorns, green cardamom, and dry cedarwood.",
+    category: "Spicy",
+    image: malabarSpice,
+    notes: {
+      top: ["Black Pepper", "Coriander"],
+      heart: ["Cardamom", "Nutmeg"],
+      base: ["Cedarwood", "Patchouli"]
+    },
+    stock: 40,
+    featured: false
+  },
+  {
+    id: "monsoon-rain",
+    name: "Monsoon Rain",
+    price: 2699,
+    tagline: "Earthy fresh green",
+    description: "The scent of first rain on sun-baked clay. Capture the ethereal petrichor scent of monsoon rain touching the earth, layered with grounding vetiver.",
+    category: "Fresh",
+    image: monsoonRain,
+    notes: {
+      top: ["Rain Accord", "Bergamot"],
+      heart: ["Petrichor", "Green Leaves"],
+      base: ["Vetiver", "Patchouli"]
+    },
+    stock: 35,
+    featured: false
+  },
+  {
+    id: "varanasi-rose",
+    name: "Varanasi Rose",
+    price: 3299,
+    tagline: "Velvet floral chypre",
+    description: "Heritage roses steeped in incense and patchouli. An ancient, mystical floral scent that pairs fresh, velvety Damask rose with spiritual temple incense.",
+    category: "Signature",
+    image: varanasiRose,
+    notes: {
+      top: ["Damask Rose", "Bergamot"],
+      heart: ["Incense", "Myrrh"],
+      base: ["Patchouli", "Sandalwood"]
+    },
+    stock: 50,
+    featured: true
   }
 ];
 

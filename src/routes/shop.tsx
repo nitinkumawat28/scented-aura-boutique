@@ -5,6 +5,8 @@ import { ChevronDown } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
 
+import { useEffect } from "react";
+
 export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
@@ -19,10 +21,16 @@ const sorts = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"]
 
 function ShopPage() {
   const products = useProductStore((s) => s.products);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+  const isLoading = useProductStore((s) => s.isLoading);
   const categories = ["All", ...new Set(products.map((p) => p.category))];
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState("Featured");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   let filtered = cat === "All" ? products : products.filter((p) => p.category === cat);
   filtered = [...filtered].sort((a, b) => {
@@ -128,11 +136,30 @@ function ShopPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
-              {filtered.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="animate-pulse space-y-4">
+                    <div className="bg-muted/40 aspect-[4/5] w-full border border-border"></div>
+                    <div className="h-3 bg-muted/40 w-1/4 mx-auto"></div>
+                    <div className="h-5 bg-muted/40 w-2/3 mx-auto"></div>
+                    <div className="h-4 bg-muted/40 w-1/3 mx-auto"></div>
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-20 border border-dashed border-border bg-muted/10">
+                <p className="font-serif italic text-muted-foreground text-lg">
+                  No fragrances match your selection.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
+                {filtered.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

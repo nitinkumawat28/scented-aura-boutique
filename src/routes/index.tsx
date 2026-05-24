@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import heroImg from "@/assets/hero-perfume.jpg";
+import heroImg from "@/assets/hero-perfume.png";
 import storyImg from "@/assets/brand-story.jpg";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
+
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,6 +20,13 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const products = useProductStore((s) => s.products);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+  const isLoading = useProductStore((s) => s.isLoading);
+  const displayProducts = products.slice(0, 4);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <>
@@ -74,7 +83,7 @@ function HomePage() {
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-deep)]">
                     New · 2026
                   </p>
-                  <p className="font-display text-lg text-foreground">Dark Amber</p>
+                  <p className="font-display text-lg text-foreground">Royal Oud</p>
                 </div>
               </div>
             </div>
@@ -102,11 +111,30 @@ function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-            {products.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="animate-pulse space-y-4">
+                  <div className="bg-muted/40 aspect-[4/5] w-full border border-border"></div>
+                  <div className="h-3 bg-muted/40 w-1/4 mx-auto"></div>
+                  <div className="h-5 bg-muted/40 w-2/3 mx-auto"></div>
+                  <div className="h-4 bg-muted/40 w-1/3 mx-auto"></div>
+                </div>
+              ))}
+            </div>
+          ) : displayProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="font-serif italic text-muted-foreground text-lg">
+                No signature fragrances found in the boutique at this moment.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+              {displayProducts.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} />
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-20">
             <Link to="/shop" className="luxury-link text-foreground">
