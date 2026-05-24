@@ -115,14 +115,16 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+  const showNavbar = !isAdmin;
+  const showFooter = !isAdmin && pathname !== "/login" && pathname !== "/signup";
 
   return (
     <QueryClientProvider client={queryClient}>
-      {!isAdmin && <Navbar />}
+      {showNavbar && <Navbar />}
       <main className={isAdmin ? "min-h-screen bg-[var(--color-secondary)]/30" : "min-h-screen"}>
         <Outlet />
       </main>
-      {!isAdmin && <Footer />}
+      {showFooter && <Footer />}
     </QueryClientProvider>
   );
 }
