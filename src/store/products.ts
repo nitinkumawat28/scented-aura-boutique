@@ -29,6 +29,7 @@ interface ProductState {
   fetchProducts: () => Promise<void>;
   addProduct: (product: Partial<Product>) => Promise<void>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
 }
 
 export const useProductStore = create<ProductState>()(
@@ -101,7 +102,30 @@ export const useProductStore = create<ProductState>()(
           set({ error: err.message || "Failed to update product", isLoading: false });
         }
       },
+
+      deleteProduct: async (id) => {
+        set({ isLoading: true, error: null });
+        // Optimistic delete for ultra-snappy UX
+        set((state) => ({
+          products: state.products.filter(p => p.id !== id)
+        }));
+
+        try {
+          await productService.deleteProduct(id);
+          set({ isLoading: false });
+        } catch (err: any) {
+          console.error("Exception during deleting product:", err);
+          // Restore products state by fetching from server on failure
+          try {
+            const data = await productService.getProducts();
+            set({ products: data, error: err.message || "Failed to delete product", isLoading: false });
+          } catch {
+            set({ error: err.message || "Failed to delete product", isLoading: false });
+          }
+        }
+      },
     }),
+
     {
       name: 'scented-aura-products',
     }

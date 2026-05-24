@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProductStore } from "@/store/products";
 import { useSiteInfoStore } from "@/store/siteInfo";
+import { useOrderStore } from "@/store/orders";
 import { 
   LayoutDashboard, 
   Package, 
@@ -46,9 +47,24 @@ function AdminPage() {
   const productsList = useProductStore((s) => s.products);
   const addProduct = useProductStore((s) => s.addProduct);
   const updateProduct = useProductStore((s) => s.updateProduct);
+  const deleteProduct = useProductStore((s) => s.deleteProduct);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+  
+  const ordersList = useOrderStore((s) => s.orders);
+  const fetchOrders = useOrderStore((s) => s.fetchOrders);
+  const updateOrderStatus = useOrderStore((s) => s.updateOrderStatus);
+
   const siteInfo = useSiteInfoStore();
   const updateSiteInfo = useSiteInfoStore((s) => s.updateSiteInfo);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchProducts();
+    fetchOrders();
+  }, [fetchProducts, fetchOrders]);
+
+  const totalRevenue = ordersList.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = ordersList.length;
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showUpload, setShowUpload] = useState(false);
@@ -261,13 +277,13 @@ function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[var(--color-cream)] p-6 border border-border shadow-sm">
                 <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Total Revenue</p>
-                <p className="text-4xl font-display text-foreground">₹3,45,000</p>
-                <p className="text-xs font-semibold tracking-wider text-[var(--color-gold-deep)] mt-3 bg-[var(--color-gold-deep)]/10 w-fit px-2 py-1 rounded">+12.5% vs last month</p>
+                <p className="text-4xl font-display text-foreground">₹{totalRevenue.toLocaleString()}</p>
+                <p className="text-xs font-semibold tracking-wider text-[var(--color-gold-deep)] mt-3 bg-[var(--color-gold-deep)]/10 w-fit px-2 py-1 rounded">Live from Supabase</p>
               </div>
               <div className="bg-[var(--color-cream)] p-6 border border-border shadow-sm">
                 <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Total Orders</p>
-                <p className="text-4xl font-display text-foreground">156</p>
-                <p className="text-xs font-semibold tracking-wider text-[var(--color-gold-deep)] mt-3 bg-[var(--color-gold-deep)]/10 w-fit px-2 py-1 rounded">+8.2% vs last month</p>
+                <p className="text-4xl font-display text-foreground">{totalOrders}</p>
+                <p className="text-xs font-semibold tracking-wider text-[var(--color-gold-deep)] mt-3 bg-[var(--color-gold-deep)]/10 w-fit px-2 py-1 rounded">Live from Supabase</p>
               </div>
               <div className="bg-[var(--color-cream)] p-6 border border-border shadow-sm">
                 <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Active Customers</p>
@@ -436,7 +452,16 @@ function AdminPage() {
                         >
                           Edit
                         </button>
-                        <button className="text-[var(--color-gold-deep)] hover:underline uppercase tracking-widest text-[10px] font-bold">Update Media</button>
+                        <button 
+                          onClick={async () => {
+                            if (confirm(`Are you sure you want to delete "${p.name}"?`)) {
+                              await deleteProduct(p.id);
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-700 uppercase tracking-widest text-[10px] font-bold"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -463,26 +488,41 @@ function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {mockOrders.map((o) => (
+                  {ordersList.map((o) => (
                     <tr key={o.id} className="hover:bg-muted/10 transition-colors bg-background">
                       <td className="px-6 py-5 font-medium text-foreground">{o.id}</td>
                       <td className="px-6 py-5">{o.customer}</td>
-                      <td className="px-6 py-5 text-muted-foreground">{o.date}</td>
+                      <td className="px-6 py-5 text-muted-foreground">
+                        {new Date(o.created_at || o.date).toLocaleDateString("en-IN", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
                       <td className="px-6 py-5 font-medium">₹{o.total.toLocaleString()}</td>
                       <td className="px-6 py-5">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${
-                          o.status === "Delivered" ? "bg-green-100 text-green-700" :
-                          o.status === "Shipped" ? "bg-blue-100 text-blue-700" :
-                          "bg-[var(--color-gold-deep)]/20 text-[var(--color-gold-deep)]"
-                        }`}>
-                          {o.status}
-                        </span>
+                        <select
+                          value={o.status}
+                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                          className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border-none outline-none cursor-pointer ${
+                            o.status === "Delivered" ? "bg-green-100 text-green-700" :
+                            o.status === "Shipped" ? "bg-blue-100 text-blue-700" :
+                            o.status === "Processing" ? "bg-amber-100 text-amber-700" :
+                            "bg-[var(--color-gold-deep)]/20 text-[var(--color-gold-deep)]"
+                          }`}
+                        >
+                          <option value="Pending" className="text-foreground bg-background">Pending</option>
+                          <option value="Processing" className="text-foreground bg-background">Processing</option>
+                          <option value="Shipped" className="text-foreground bg-background">Shipped</option>
+                          <option value="Delivered" className="text-foreground bg-background">Delivered</option>
+                        </select>
                       </td>
                       <td className="px-6 py-5 text-right">
                         <button className="text-[var(--color-gold-deep)] hover:underline uppercase tracking-widest text-[10px] font-bold">View</button>
                       </td>
                     </tr>
                   ))}
+
                 </tbody>
               </table>
             </div>

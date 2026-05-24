@@ -98,5 +98,20 @@ export const productService = {
       ...data,
       image: imageMap[data.image] || data.image || "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80",
     } as Product;
+  },
+
+  /**
+   * Delete a product from Supabase
+   */
+  async deleteProduct(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
   }
 };
+

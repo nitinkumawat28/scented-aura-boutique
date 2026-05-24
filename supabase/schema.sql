@@ -1,5 +1,6 @@
--- Drop products table if it exists to allow resetting the schema
+-- Drop products and orders table if they exist to allow resetting the schema
 DROP TABLE IF EXISTS public.products CASCADE;
+DROP TABLE IF EXISTS public.orders CASCADE;
 
 -- Create products table
 CREATE TABLE IF NOT EXISTS public.products (
@@ -131,3 +132,38 @@ INSERT INTO public.products (id, name, price, tagline, description, category, im
     true
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- Create orders table
+CREATE TABLE IF NOT EXISTS public.orders (
+    id TEXT PRIMARY KEY,
+    customer TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    total INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending',
+    items INTEGER NOT NULL DEFAULT 1
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access to orders
+CREATE POLICY "Allow public read access to orders" 
+ON public.orders 
+FOR SELECT 
+USING (true);
+
+-- Allow public write access to orders for customer checkout and admin dashboard
+CREATE POLICY "Allow public write access to orders" 
+ON public.orders 
+FOR ALL 
+USING (true)
+WITH CHECK (true);
+
+-- Seed mock order history
+INSERT INTO public.orders (id, customer, created_at, total, status, items) VALUES
+('ORD-1092', 'Aarav Sharma', '2026-04-12 10:00:00+00', 10500, 'Delivered', 1),
+('ORD-1154', 'Priya Patel', '2026-05-02 12:30:00+00', 20500, 'Processing', 2),
+('ORD-1155', 'Rahul Verma', '2026-05-14 14:15:00+00', 15500, 'Shipped', 1),
+('ORD-1156', 'Neha Gupta', '2026-05-15 16:45:00+00', 32000, 'Pending', 3)
+ON CONFLICT (id) DO NOTHING;
+
