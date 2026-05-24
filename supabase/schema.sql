@@ -168,8 +168,6 @@ INSERT INTO public.orders (id, customer, created_at, total, status, items) VALUE
 ON CONFLICT (id) DO NOTHING;
 
 -- Enable Realtime for products and orders tables
-alter publication supabase_realtime drop table if exists public.products;
-alter publication supabase_realtime drop table if exists public.orders;
 alter publication supabase_realtime add table public.products;
 alter publication supabase_realtime add table public.orders;
 
