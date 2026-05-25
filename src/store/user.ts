@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { supabase } from "@/lib/supabase";
 
 export interface Address {
   id: string;
@@ -31,63 +32,166 @@ export interface Order {
 interface UserState {
   user: User | null;
   orders: Order[];
-  login: (email: string, password?: string) => void;
-  register: (firstName: string, lastName: string, email: string) => void;
-  logout: () => void;
-  updateProfile: (data: Partial<User>) => void;
-  addAddress: (address: Omit<Address, "id">) => void;
+  isLoading: boolean;
+  login: (email: string, password?: string) => Promise<void>;
+  register: (firstName: string, lastName: string, email: string, password?: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
+  addAddress: (address: Omit<Address, "id">) => Promise<void>;
+  addOrder: (order: Omit<Order, "id" | "date" | "status">) => Promise<void>;
+  setUser: (user: User | null) => void;
+  setOrders: (orders: Order[]) => void;
 }
 
-export const useUser = create<UserState>((set) => ({
+export const useUser = create<UserState>((set, get) => ({
   user: null,
-  orders: [
-    { 
-      id: "OD1234567890", 
-      date: "2026-04-12", 
-      total: 10500, 
-      status: "Delivered",
-      items: [{ name: "Dark Amber", qty: 1, price: 10500 }]
-    },
-    { 
-      id: "OD0987654321", 
-      date: "2026-05-02", 
-      total: 20500, 
-      status: "Shipped",
-      items: [{ name: "Heritage Rose", qty: 1, price: 20500 }]
-    },
-  ],
-  login: (email) => set({ 
-    user: { 
-      id: "1", 
-      firstName: "Guest", 
-      lastName: "User", 
-      gender: "Male",
-      email, 
-      mobile: "+91 9876543210",
-      addresses: [
-        { id: "a1", name: "Guest User", street: "123 Perfume Lane", city: "Mumbai", state: "Maharashtra", pincode: "400001", mobile: "9876543210" }
-      ]
-    } 
-  }),
-  register: (firstName, lastName, email) => set({
-    user: {
-      id: Date.now().toString(),
-      firstName,
-      lastName,
-      gender: "",
+  orders: [],
+  isLoading: false,
+
+  setUser: (user) => set({ user }),
+  setOrders: (orders) => set({ orders }),
+
+  login: async (email, password) => {
+    set({ isLoading: true });
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      mobile: "",
-      addresses: []
+      password: password || "",
+    });
+
+    set({ isLoading: false });
+    if (error) {
+      throw new Error(error.message);
     }
-  }),
-  logout: () => set({ user: null }),
-  updateProfile: (data) => set((state) => ({ 
-    user: state.user ? { ...state.user, ...data } : null 
-  })),
-  addAddress: (address) => set((state) => ({
-    user: state.user ? {
-      ...state.user,
-      addresses: [...state.user.addresses, { ...address, id: Date.now().toString() }]
-    } : null
-  }))
+  },
+
+  register: async (firstName, lastName, email, password) => {
+    set({ isLoading: true });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: password || "",
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          addresses: [],
+          mobile: "",
+          gender: "",
+        },
+      },
+    });
+
+    set({ isLoading: false });
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  logout: async () => {
+    set({ isLoading: true });
+    const { error } = await supabase.auth.signOut();
+    set({ isLoading: false, user: null, orders: [] });
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isLoading: true });
+    const user = get().user;
+    if (!user) {
+      set({ isLoading: false });
+      throw new Error("No active authenticated user session.");
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        first_name: data.firstName !== undefined ? data.firstName : user.firstName,
+        last_name: data.lastName !== undefined ? data.lastName : user.lastName,
+        gender: data.gender !== undefined ? data.gender : user.gender,
+        mobile: data.mobile !== undefined ? data.mobile : user.mobile,
+      },
+    });
+
+    set({ isLoading: false });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Instantly update local state for responsive UI
+    set((state) => ({
+      user: state.user ? { ...state.user, ...data } : null,
+    }));
+  },
+
+  addAddress: async (address) => {
+    set({ isLoading: true });
+    const user = get().user;
+    if (!user) {
+      set({ isLoading: false });
+      throw new Error("No active authenticated user session.");
+    }
+
+    const currentAddresses = user.addresses || [];
+    const newAddresses = [
+      ...currentAddresses,
+      { ...address, id: Date.now().toString() },
+    ];
+
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        addresses: newAddresses,
+      },
+    });
+
+    set({ isLoading: false });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Instantly update local state for responsive UI
+    set((state) => ({
+      user: state.user ? { ...state.user, addresses: newAddresses } : null,
+    }));
+  },
+
+  addOrder: async (orderData) => {
+    const user = get().user;
+    const customerName = user ? `${user.firstName} ${user.lastName}` : "Valued Guest";
+    const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000).toString();
+
+    const newSupabaseOrder = {
+      id: orderId,
+      customer: customerName,
+      total: orderData.total,
+      status: "Confirmed",
+      items: orderData.items.reduce((acc, i) => acc + i.qty, 0),
+      products: orderData.items.map((item) => ({
+        id: item.name.toLowerCase().replace(/ /g, "-"),
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        size: "100ml",
+      })),
+    };
+
+    // Insert order to Supabase orders table
+    const { error } = await supabase.from("orders").insert([newSupabaseOrder]);
+
+    if (error) {
+      console.error("Exception persisting checkout order in Supabase:", error);
+    }
+
+    // Push to store's local order list
+    const newLocalOrder: Order = {
+      id: orderId,
+      date: new Date().toISOString().split("T")[0],
+      total: orderData.total,
+      status: "Confirmed",
+      items: orderData.items,
+    };
+
+    set((state) => ({
+      orders: [newLocalOrder, ...state.orders],
+    }));
+  },
 }));

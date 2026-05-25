@@ -12,6 +12,9 @@ import {
 import appCss from "../styles.css?url";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useUser } from "@/store/user";
 
 function NotFoundComponent() {
   return (
@@ -117,6 +120,50 @@ function RootComponent() {
   const isAdmin = pathname.startsWith("/admin");
   const showNavbar = !isAdmin;
   const showFooter = !isAdmin && pathname !== "/login" && pathname !== "/signup";
+  
+  const setUser = useUser((s) => s.setUser);
+
+  useEffect(() => {
+    // 1. Recover session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          firstName: metadata.first_name || "Guest",
+          lastName: metadata.last_name || "User",
+          gender: metadata.gender || "",
+          mobile: metadata.mobile || "",
+          addresses: metadata.addresses || [],
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    // 2. Listen to real-time auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          firstName: metadata.first_name || "Guest",
+          lastName: metadata.last_name || "User",
+          gender: metadata.gender || "",
+          mobile: metadata.mobile || "",
+          addresses: metadata.addresses || [],
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [setUser]);
 
   return (
     <QueryClientProvider client={queryClient}>

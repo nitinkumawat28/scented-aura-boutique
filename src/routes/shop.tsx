@@ -27,15 +27,36 @@ function ShopPage() {
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState("Featured");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [priceFilter, setPriceFilter] = useState("All");
+
+  const priceRanges = ["All", "Under ₹3,000", "₹3,000 — ₹3,500", "Above ₹3,500"];
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Apply Category Filter
   let filtered = cat === "All" ? products : products.filter((p) => p.category === cat);
+  
+  // Apply Price Filter connected to Supabase prices
+  if (priceFilter === "Under ₹3,000") {
+    filtered = filtered.filter((p) => p.price < 3000);
+  } else if (priceFilter === "₹3,000 — ₹3,500") {
+    filtered = filtered.filter((p) => p.price >= 3000 && p.price <= 3500);
+  } else if (priceFilter === "Above ₹3,500") {
+    filtered = filtered.filter((p) => p.price > 3500);
+  }
+
+  // Apply Sorting
   filtered = [...filtered].sort((a, b) => {
     if (sort === "Price: Low to High") return a.price - b.price;
     if (sort === "Price: High to Low") return b.price - a.price;
+    if (sort === "Newest") {
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    }
+    if (sort === "Featured") {
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    }
     return 0;
   });
 
@@ -87,10 +108,21 @@ function ShopPage() {
               <h3 className="text-xs uppercase tracking-[0.3em] text-foreground mb-5 pb-3 border-b border-border">
                 Price
               </h3>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><button className="hover:text-foreground transition-colors">Under ₹15,000</button></li>
-                <li><button className="hover:text-foreground transition-colors">₹15,000 — ₹20,000</button></li>
-                <li><button className="hover:text-foreground transition-colors">Above ₹20,000</button></li>
+              <ul className="space-y-3">
+                {priceRanges.map((range) => (
+                  <li key={range}>
+                    <button
+                      onClick={() => setPriceFilter(range)}
+                      className={`text-sm transition-colors cursor-pointer ${
+                        priceFilter === range
+                          ? "text-foreground italic font-serif"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {range}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </aside>

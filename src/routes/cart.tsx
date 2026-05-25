@@ -114,9 +114,9 @@ function CartPage() {
                 </div>
               </dl>
 
-              <button className="btn-luxury w-full mt-8">
+              <Link to="/checkout" className="btn-luxury w-full mt-8 text-center block">
                 Proceed to Checkout
-              </button>
+              </Link>
               <p className="text-xs text-center text-muted-foreground mt-6 font-serif italic">
                 Complimentary samples enclosed with every order.
               </p>
