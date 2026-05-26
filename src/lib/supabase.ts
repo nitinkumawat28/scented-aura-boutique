@@ -35,3 +35,17 @@ const supabaseAnonKey =
   "your-anon-key";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Automatically retries an async database request up to N times with exponential backoff.
+ */
+export async function retryRequest<T>(fn: () => Promise<T>, retries = 2, delayMs = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    console.warn(`Supabase request failed. Retrying in ${delayMs}ms... (${retries} retries left)`);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return retryRequest(fn, retries - 1, delayMs * 2);
+  }
+}

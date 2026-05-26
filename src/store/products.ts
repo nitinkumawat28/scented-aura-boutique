@@ -46,7 +46,8 @@ export const useProductStore = create<ProductState>()(
           return;
         }
 
-        set({ isLoading: true, error: null });
+        const hasProducts = get().products.length > 0;
+        set({ isLoading: !hasProducts, error: null });
         try {
           const data = await productService.getProducts();
           if (data && data.length > 0) {
