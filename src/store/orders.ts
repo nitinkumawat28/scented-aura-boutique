@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { orderService, Order } from "@/services/orders";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 interface OrderState {
   orders: Order[];
@@ -19,6 +20,12 @@ export const useOrderStore = create<OrderState>()(
       error: null,
 
       fetchOrders: async () => {
+        if (!isSupabaseConfigured) {
+          console.warn("Supabase is not configured. Skipping orders fetch.");
+          set({ isLoading: false });
+          return;
+        }
+
         set({ isLoading: true, error: null });
         try {
           const data = await orderService.getOrders();

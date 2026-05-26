@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { products as initialProducts } from "@/data/products";
 import { productService } from "@/services/products";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export interface Product {
   id: string;
@@ -40,6 +40,12 @@ export const useProductStore = create<ProductState>()(
       error: null,
       
       fetchProducts: async () => {
+        if (!isSupabaseConfigured) {
+          console.warn("Supabase is not configured. Falling back to local data.");
+          set({ isLoading: false });
+          return;
+        }
+
         set({ isLoading: true, error: null });
         try {
           const data = await productService.getProducts();
