@@ -22,7 +22,14 @@ export const imageMap: Record<string, string> = {
   "varanasi-rose": varanasiRose,
 };
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://your-project-id.supabase.co";
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "your-anon-key";
+const supabaseUrl = 
+  (typeof process !== "undefined" ? process.env?.VITE_SUPABASE_URL : undefined) ||
+  import.meta.env.VITE_SUPABASE_URL || 
+  "https://your-project-id.supabase.co";
+
+const supabaseAnonKey = 
+  (typeof process !== "undefined" ? process.env?.VITE_SUPABASE_ANON_KEY : undefined) ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY || 
+  "your-anon-key";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

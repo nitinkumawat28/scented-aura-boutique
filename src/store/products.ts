@@ -34,7 +34,7 @@ interface ProductState {
 
 export const useProductStore = create<ProductState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       products: initialProducts.map(p => ({ ...p, intensity: "Medium" })), // Fallback local data cache
       isLoading: false,
       error: null,
@@ -81,11 +81,14 @@ export const useProductStore = create<ProductState>()(
         } catch (err: any) {
           console.error("Exception during inserting product:", err);
           set({ error: err.message || "Failed to add product", isLoading: false });
+          throw err;
         }
       },
 
       updateProduct: async (id, updates) => {
         set({ isLoading: true, error: null });
+        const previousProducts = get().products;
+
         // Optimistically update local state first for ultra-snappy UX
         set((state) => ({
           products: state.products.map(p => p.id === id ? { ...p, ...updates } as Product : p)
@@ -99,12 +102,20 @@ export const useProductStore = create<ProductState>()(
           }));
         } catch (err: any) {
           console.error("Exception during updating product:", err);
-          set({ error: err.message || "Failed to update product", isLoading: false });
+          // Rollback to previous products list on failure
+          set({ 
+            products: previousProducts,
+            error: err.message || "Failed to update product", 
+            isLoading: false 
+          });
+          throw err;
         }
       },
 
       deleteProduct: async (id) => {
         set({ isLoading: true, error: null });
+        const previousProducts = get().products;
+
         // Optimistic delete for ultra-snappy UX
         set((state) => ({
           products: state.products.filter(p => p.id !== id)
@@ -115,13 +126,13 @@ export const useProductStore = create<ProductState>()(
           set({ isLoading: false });
         } catch (err: any) {
           console.error("Exception during deleting product:", err);
-          // Restore products state by fetching from server on failure
-          try {
-            const data = await productService.getProducts();
-            set({ products: data, error: err.message || "Failed to delete product", isLoading: false });
-          } catch {
-            set({ error: err.message || "Failed to delete product", isLoading: false });
-          }
+          // Restore products state by rolling back to previous state
+          set({ 
+            products: previousProducts, 
+            error: err.message || "Failed to delete product", 
+            isLoading: false 
+          });
+          throw err;
         }
       },
     }),

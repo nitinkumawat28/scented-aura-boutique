@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useProductStore } from "@/store/products";
 import { useSiteInfoStore } from "@/store/siteInfo";
 import { useOrderStore } from "@/store/orders";
+import { toast } from "sonner";
 import { 
   LayoutDashboard, 
   Package, 
@@ -163,37 +164,43 @@ function AdminPage() {
       });
     }
     
-    if (editingProductId) {
-      updateProduct(editingProductId, {
-        name: newName,
-        category: newCat,
-        price: Number(newPrice) || 0,
-        stock: Number(newStock) || 0,
-        tagline: newTagline,
-        description: newDescription,
-        ...(imageUrl && { image: imageUrl }),
-      });
-    } else {
-      addProduct({
-        name: newName,
-        category: newCat,
-        price: Number(newPrice) || 0,
-        stock: Number(newStock) || 0,
-        tagline: newTagline,
-        description: newDescription,
-        ...(imageUrl && { image: imageUrl }),
-      });
+    try {
+      if (editingProductId) {
+        await updateProduct(editingProductId, {
+          name: newName,
+          category: newCat,
+          price: Number(newPrice) || 0,
+          stock: Number(newStock) || 0,
+          tagline: newTagline,
+          description: newDescription,
+          ...(imageUrl && { image: imageUrl }),
+        });
+        toast.success(`"${newName}" updated successfully!`);
+      } else {
+        await addProduct({
+          name: newName,
+          category: newCat,
+          price: Number(newPrice) || 0,
+          stock: Number(newStock) || 0,
+          tagline: newTagline,
+          description: newDescription,
+          ...(imageUrl && { image: imageUrl }),
+        });
+        toast.success(`"${newName}" created successfully!`);
+      }
+      
+      setNewName("");
+      setNewPrice("");
+      setNewStock("");
+      setNewTagline("");
+      setNewDescription("");
+      setNewCat("Oriental");
+      setMediaFiles([]);
+      setShowUpload(false);
+      setEditingProductId(null);
+    } catch (err: any) {
+      toast.error(`Error saving product: ${err.message || "Unknown error"}`);
     }
-    
-    setNewName("");
-    setNewPrice("");
-    setNewStock("");
-    setNewTagline("");
-    setNewDescription("");
-    setNewCat("Oriental");
-    setMediaFiles([]);
-    setShowUpload(false);
-    setEditingProductId(null);
   };
 
   if (!isAuthenticated) {
@@ -474,7 +481,12 @@ function AdminPage() {
                         <button 
                           onClick={async () => {
                             if (confirm(`Are you sure you want to delete "${p.name}"?`)) {
-                              await deleteProduct(p.id);
+                              try {
+                                await deleteProduct(p.id);
+                                toast.success(`"${p.name}" deleted successfully!`);
+                              } catch (err: any) {
+                                toast.error(`Failed to delete product: ${err.message || "Unknown error"}`);
+                              }
                             }
                           }}
                           className="text-red-500 hover:text-red-700 uppercase tracking-widest text-[10px] font-bold"
@@ -522,7 +534,14 @@ function AdminPage() {
                       <td className="px-6 py-5">
                         <select
                           value={o.status}
-                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                          onChange={async (e) => {
+                            try {
+                              await updateOrderStatus(o.id, e.target.value);
+                              toast.success(`Order ${o.id} status updated to ${e.target.value}`);
+                            } catch (err: any) {
+                              toast.error(`Failed to update status: ${err.message || "Unknown error"}`);
+                            }
+                          }}
                           className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border-none outline-none cursor-pointer ${
                             o.status === "Delivered" ? "bg-green-100 text-green-700" :
                             o.status === "Shipped" ? "bg-blue-100 text-blue-700" :
@@ -699,9 +718,14 @@ function AdminPage() {
                     <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Order Status</h4>
                     <select
                       value={selectedOrder.status}
-                      onChange={(e) => {
-                        updateOrderStatus(selectedOrder.id, e.target.value);
-                        setSelectedOrder({ ...selectedOrder, status: e.target.value });
+                      onChange={async (e) => {
+                        try {
+                          await updateOrderStatus(selectedOrder.id, e.target.value);
+                          setSelectedOrder({ ...selectedOrder, status: e.target.value });
+                          toast.success(`Order ${selectedOrder.id} status updated to ${e.target.value}`);
+                        } catch (err: any) {
+                          toast.error(`Failed to update status: ${err.message || "Unknown error"}`);
+                        }
                       }}
                       className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded border border-border bg-background outline-none cursor-pointer ${
                         selectedOrder.status === "Delivered" ? "bg-green-50 text-green-700 border-green-200" :

@@ -65,6 +65,7 @@ export const useOrderStore = create<OrderState>()(
           } catch {
             set({ error: err.message || "Failed to update order status", isLoading: false });
           }
+          throw err;
         }
       }
     }),
