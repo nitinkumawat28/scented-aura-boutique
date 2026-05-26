@@ -4,6 +4,7 @@ import { useProductStore } from "@/store/products";
 import { useSiteInfoStore } from "@/store/siteInfo";
 import { useOrderStore } from "@/store/orders";
 import { toast } from "sonner";
+import { isSupabaseConfigured, supabaseUrl } from "@/lib/supabase";
 import { 
   LayoutDashboard, 
   Package, 
@@ -288,7 +289,17 @@ function AdminPage() {
 
         {activeTab === "dashboard" && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <h1 className="font-display text-4xl text-foreground">Overview</h1>
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
+              <h1 className="font-display text-4xl text-foreground">Overview</h1>
+              <div className={`px-4 py-2 border text-xs font-semibold tracking-wider uppercase rounded-full flex items-center gap-2 ${
+                isSupabaseConfigured 
+                  ? "bg-green-500/10 text-green-600 border-green-500/20" 
+                  : "bg-amber-500/10 text-amber-600 border-amber-500/20 animate-pulse"
+              }`}>
+                <span className={`w-2.5 h-2.5 rounded-full ${isSupabaseConfigured ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
+                {isSupabaseConfigured ? `Supabase: Connected` : "Supabase: Unconfigured (Vercel Env Missing)"}
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[var(--color-cream)] p-6 border border-border shadow-sm">
