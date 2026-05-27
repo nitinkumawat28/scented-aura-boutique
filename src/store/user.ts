@@ -33,8 +33,8 @@ interface UserState {
   user: User | null;
   orders: Order[];
   isLoading: boolean;
-  login: (email: string, password?: string) => Promise<void>;
-  register: (firstName: string, lastName: string, email: string, password?: string) => Promise<void>;
+  login: (email: string, password?: string) => Promise<any>;
+  register: (firstName: string, lastName: string, email: string, password?: string) => Promise<any>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   addAddress: (address: Omit<Address, "id">) => Promise<void>;
@@ -53,20 +53,47 @@ export const useUser = create<UserState>((set, get) => ({
 
   login: async (email, password) => {
     set({ isLoading: true });
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password: password || "",
     });
 
-    set({ isLoading: false });
     if (error) {
+      set({ isLoading: false });
       throw new Error(error.message);
     }
+
+    // Do not block login if profile row does not exist; create it automatically if missing
+    if (data.user) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if (!profile) {
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert([
+              { id: data.user.id, email: data.user.email, role: "user" }
+            ]);
+          if (insertError) {
+            console.error("Error auto-creating missing profile row during login:", insertError);
+          }
+        }
+      } catch (profileErr) {
+        console.error("Exception checking/creating user profile on login:", profileErr);
+      }
+    }
+
+    set({ isLoading: false });
+    return data;
   },
 
   register: async (firstName, lastName, email, password) => {
     set({ isLoading: true });
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password: password || "",
       options: {
@@ -80,10 +107,29 @@ export const useUser = create<UserState>((set, get) => ({
       },
     });
 
-    set({ isLoading: false });
     if (error) {
+      set({ isLoading: false });
       throw new Error(error.message);
     }
+
+    // Automatically create a row in profiles with id, email, and role = "user"
+    if (data.user) {
+      try {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert([
+            { id: data.user.id, email: data.user.email, role: "user" }
+          ]);
+        if (profileError) {
+          console.error("Error auto-creating profile row during registration:", profileError);
+        }
+      } catch (profileErr) {
+        console.error("Exception inserting user profile on registration:", profileErr);
+      }
+    }
+
+    set({ isLoading: false });
+    return data;
   },
 
   logout: async () => {

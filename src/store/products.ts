@@ -25,7 +25,7 @@ interface ProductState {
   products: Product[];
   isLoading: boolean;
   error: string | null;
-  fetchProducts: () => Promise<void>;
+  fetchProducts: (force?: boolean) => Promise<void>;
   addProduct: (product: Partial<Product>) => Promise<void>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -37,7 +37,7 @@ export const useProductStore = create<ProductState>()(
     isLoading: false,
     error: null,
     
-    fetchProducts: async () => {
+    fetchProducts: async (force = false) => {
       if (!isSupabaseConfigured) {
         console.warn("Supabase is not configured. Falling back to local data.");
         set({ isLoading: false });
@@ -45,6 +45,36 @@ export const useProductStore = create<ProductState>()(
       }
 
       const hasProducts = get().products.length > 0;
+
+      // Ensure Realtime listener is subscribed in the client environment
+      if (typeof window !== "undefined") {
+        const existingChannels = supabase.getChannels();
+        const channelName = "realtime-products";
+        const alreadySubscribed = existingChannels.some(ch => ch.name === channelName);
+
+        if (!alreadySubscribed) {
+          supabase
+            .channel(channelName)
+            .on("postgres_changes", { event: "*", schema: "public", table: "products" }, async (payload) => {
+              console.log("Realtime products update received:", payload);
+              try {
+                const freshData = await productService.getProducts();
+                if (freshData && freshData.length > 0) {
+                  set({ products: freshData });
+                }
+              } catch (fetchErr) {
+                console.error("Error refreshing realtime products data:", fetchErr);
+              }
+            })
+            .subscribe();
+        }
+      }
+
+      // If we already have products loaded, skip the database fetch (rely on Realtime for updates)
+      if (hasProducts && !force) {
+        return;
+      }
+
       set({ isLoading: !hasProducts, error: null });
       try {
         const data = await productService.getProducts();
@@ -52,30 +82,6 @@ export const useProductStore = create<ProductState>()(
           set({ products: data, isLoading: false });
         } else {
           set({ isLoading: false });
-        }
-
-        // Enable Supabase Realtime postgres listener on public.products changes (SSR safe)
-        if (typeof window !== "undefined") {
-          const existingChannels = supabase.getChannels();
-          const channelName = "realtime-products";
-          const alreadySubscribed = existingChannels.some(ch => ch.name === channelName);
-
-          if (!alreadySubscribed) {
-            supabase
-              .channel(channelName)
-              .on("postgres_changes", { event: "*", schema: "public", table: "products" }, async (payload) => {
-                console.log("Realtime products update received:", payload);
-                try {
-                  const freshData = await productService.getProducts();
-                  if (freshData && freshData.length > 0) {
-                    set({ products: freshData });
-                  }
-                } catch (fetchErr) {
-                  console.error("Error refreshing realtime products data:", fetchErr);
-                }
-              })
-              .subscribe();
-          }
         }
       } catch (err: any) {
         console.error("Exception during fetching Supabase products:", err);

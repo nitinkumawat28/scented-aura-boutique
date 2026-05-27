@@ -6,7 +6,7 @@ interface OrderState {
   orders: Order[];
   isLoading: boolean;
   error: string | null;
-  fetchOrders: () => Promise<void>;
+  fetchOrders: (force?: boolean) => Promise<void>;
   addOrder: (order: Partial<Order>) => Promise<void>;
   updateOrderStatus: (id: string, status: string) => Promise<void>;
 }
@@ -17,7 +17,7 @@ export const useOrderStore = create<OrderState>()(
       isLoading: false,
       error: null,
 
-      fetchOrders: async () => {
+      fetchOrders: async (force = false) => {
         if (!isSupabaseConfigured) {
           console.warn("Supabase is not configured. Skipping orders fetch.");
           set({ isLoading: false });
@@ -25,6 +25,12 @@ export const useOrderStore = create<OrderState>()(
         }
 
         const hasOrders = get().orders.length > 0;
+
+        // Skip fetch if orders are already in memory, unless forced
+        if (hasOrders && !force) {
+          return;
+        }
+
         set({ isLoading: !hasOrders, error: null });
         try {
           const data = await orderService.getOrders();

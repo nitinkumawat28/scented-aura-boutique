@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
-
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/shop")({
   loader: async () => {
@@ -25,9 +23,7 @@ const sorts = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"]
 
 function ShopPage() {
   const products = useProductStore((s) => s.products);
-  const fetchProducts = useProductStore((s) => s.fetchProducts);
   const isLoading = useProductStore((s) => s.isLoading);
-  const categories = ["All", ...new Set(products.map((p) => p.category))];
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState("Featured");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -35,34 +31,37 @@ function ShopPage() {
 
   const priceRanges = ["All", "Under ₹3,000", "₹3,000 — ₹3,500", "Above ₹3,500"];
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  // Memoize categories creation to prevent redundant maps/Sets on every render
+  const categories = useMemo(() => {
+    return ["All", ...new Set(products.map((p) => p.category))];
+  }, [products]);
 
-  // Apply Category Filter
-  let filtered = cat === "All" ? products : products.filter((p) => p.category === cat);
-  
-  // Apply Price Filter connected to Supabase prices
-  if (priceFilter === "Under ₹3,000") {
-    filtered = filtered.filter((p) => p.price < 3000);
-  } else if (priceFilter === "₹3,000 — ₹3,500") {
-    filtered = filtered.filter((p) => p.price >= 3000 && p.price <= 3500);
-  } else if (priceFilter === "Above ₹3,500") {
-    filtered = filtered.filter((p) => p.price > 3500);
-  }
+  // Memoize sorting and filtering calculations to keep sorting dropdown and UI buttery smooth
+  const filtered = useMemo(() => {
+    let result = cat === "All" ? products : products.filter((p) => p.category === cat);
+    
+    // Apply Price Filter connected to Supabase prices
+    if (priceFilter === "Under ₹3,000") {
+      result = result.filter((p) => p.price < 3000);
+    } else if (priceFilter === "₹3,000 — ₹3,500") {
+      result = result.filter((p) => p.price >= 3000 && p.price <= 3500);
+    } else if (priceFilter === "Above ₹3,500") {
+      result = result.filter((p) => p.price > 3500);
+    }
 
-  // Apply Sorting
-  filtered = [...filtered].sort((a, b) => {
-    if (sort === "Price: Low to High") return a.price - b.price;
-    if (sort === "Price: High to Low") return b.price - a.price;
-    if (sort === "Newest") {
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-    }
-    if (sort === "Featured") {
-      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-    }
-    return 0;
-  });
+    // Apply Sorting
+    return [...result].sort((a, b) => {
+      if (sort === "Price: Low to High") return a.price - b.price;
+      if (sort === "Price: High to Low") return b.price - a.price;
+      if (sort === "Newest") {
+        return new Date((b as any).created_at || 0).getTime() - new Date((a as any).created_at || 0).getTime();
+      }
+      if (sort === "Featured") {
+        return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+      }
+      return 0;
+    });
+  }, [products, cat, priceFilter, sort]);
 
   return (
     <div className="pt-32 pb-24">
