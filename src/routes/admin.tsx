@@ -34,7 +34,7 @@ export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — The Scented Aura" }] }),
   component: () => (
     <ProtectedAdminRoute>
-      <AdminPage />
+      <AdminPage defaultTab="dashboard" />
     </ProtectedAdminRoute>
   ),
 });
@@ -108,7 +108,7 @@ const compressImage = (file: File, maxWidth = 800, maxHeight = 800, quality = 0.
   });
 };
 
-function AdminPage() {
+export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string }) {
   const productsList = useProductStore((s) => s.products);
   const addProduct = useProductStore((s) => s.addProduct);
   const updateProduct = useProductStore((s) => s.updateProduct);
@@ -131,7 +131,7 @@ function AdminPage() {
   const totalRevenue = ordersList.reduce((sum, o) => sum + o.total, 0);
   const totalOrders = ordersList.length;
 
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [showUpload, setShowUpload] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);

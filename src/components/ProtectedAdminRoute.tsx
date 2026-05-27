@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
-import { ShieldAlert, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { isAdmin } from "@/lib/auth";
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode;
@@ -10,7 +12,6 @@ interface ProtectedAdminRouteProps {
 export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [redirectCount, setRedirectCount] = useState(3);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,37 +22,27 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
         // 1. Get logged in user from Supabase Auth
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session?.user) {
+        if (!session?.user || !session.user.email) {
           if (active) {
             setIsAuthorized(false);
             setLoading(false);
+            toast.error("Unauthorized access. Please login first.");
+            navigate({ to: "/" });
           }
           return;
         }
 
-        // 2. Fetch role from profiles table
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
+        // 2. Fetch admin access permission using the new email-based list check
+        const adminStatus = await isAdmin(session.user.email);
 
-        if (error) {
-          console.error("Error fetching user profile role:", error);
-          // If profiles check fails but they are signed in, we still restrict to be secure
-          if (active) {
-            setIsAuthorized(false);
-            setLoading(false);
-          }
-          return;
-        }
-
-        // 3. Allow access only if role === "admin"
+        // 3. Allow access only if email exists in the 'admin access' table
         if (active) {
-          if (profile?.role === "admin") {
+          if (adminStatus) {
             setIsAuthorized(true);
           } else {
             setIsAuthorized(false);
+            toast.error("Unauthorized access. Admin privileges required.");
+            navigate({ to: "/" });
           }
           setLoading(false);
         }
@@ -60,6 +51,8 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
         if (active) {
           setIsAuthorized(false);
           setLoading(false);
+          toast.error("An error occurred during verification.");
+          navigate({ to: "/" });
         }
       }
     }
@@ -67,11 +60,13 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
     checkAuth();
 
     // Listen to changes in auth state to auto-resolve dynamically
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
         if (active) {
           setIsAuthorized(false);
           setLoading(false);
+          toast.error("Session expired. Please login again.");
+          navigate({ to: "/" });
         }
       } else {
         checkAuth();
@@ -82,25 +77,7 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
-
-  // 4. Otherwise redirect to "/" after showing unauthorized page
-  useEffect(() => {
-    if (!loading && !isAuthorized) {
-      const timer = setInterval(() => {
-        setRedirectCount((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            navigate({ to: "/" });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [loading, isAuthorized, navigate]);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -113,29 +90,6 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
     );
   }
 
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-ivory)] px-6 text-center animate-in fade-in duration-500">
-        <div className="bg-[var(--color-cream)] p-12 border border-border shadow-[var(--shadow-soft)] max-w-md w-full space-y-6">
-          <div className="flex justify-center text-red-700/80">
-            <ShieldAlert size={48} strokeWidth={1.2} />
-          </div>
-          <span className="gold-divider mb-2">Access Restricted</span>
-          <h1 className="font-display text-3xl text-foreground">
-            Unauthorized Access
-          </h1>
-          <p className="text-muted-foreground font-serif italic leading-relaxed text-sm">
-            This workspace is locked by royal seal. Only authenticated administrators may compose formulas in this atelier.
-          </p>
-          <div className="pt-4 border-t border-border/60">
-            <p className="text-xs text-muted-foreground uppercase tracking-widest">
-              Redirecting to boutique in <span className="font-semibold text-foreground">{redirectCount}s</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
+  // Only render children if authorized, otherwise render nothing as we are redirecting
+  return isAuthorized ? <>{children}</> : null;
 }
