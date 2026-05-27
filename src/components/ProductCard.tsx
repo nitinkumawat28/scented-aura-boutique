@@ -9,10 +9,11 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.8, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isEager ? { opacity: 1, y: 0 } : undefined}
+      whileInView={!isEager ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: isEager ? index * 0.05 : 0, ease: [0.22, 1, 0.36, 1] }}
       className="group"
     >
       <Link to="/product/$id" params={{ id: product.id }} className="block">

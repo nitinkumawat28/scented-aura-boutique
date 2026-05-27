@@ -33,8 +33,8 @@ interface UserState {
   user: User | null;
   orders: Order[];
   isLoading: boolean;
-  login: (email: string, password?: string) => Promise<void>;
-  register: (firstName: string, lastName: string, email: string, password?: string) => Promise<void>;
+  login: (email: string, password?: string) => Promise<any>;
+  register: (firstName: string, lastName: string, email: string, password?: string) => Promise<any>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   addAddress: (address: Omit<Address, "id">) => Promise<void>;
@@ -53,20 +53,23 @@ export const useUser = create<UserState>((set, get) => ({
 
   login: async (email, password) => {
     set({ isLoading: true });
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password: password || "",
     });
 
-    set({ isLoading: false });
     if (error) {
+      set({ isLoading: false });
       throw new Error(error.message);
     }
+
+    set({ isLoading: false });
+    return data;
   },
 
   register: async (firstName, lastName, email, password) => {
     set({ isLoading: true });
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password: password || "",
       options: {
@@ -80,10 +83,13 @@ export const useUser = create<UserState>((set, get) => ({
       },
     });
 
-    set({ isLoading: false });
     if (error) {
+      set({ isLoading: false });
       throw new Error(error.message);
     }
+
+    set({ isLoading: false });
+    return data;
   },
 
   logout: async () => {

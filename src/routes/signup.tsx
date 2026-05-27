@@ -25,6 +25,7 @@ function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,13 +37,39 @@ function SignupPage() {
     }
 
     try {
-      await register(firstName, lastName, email, password);
-      // Clean redirect upon successful Supabase registration
-      navigate({ to: redirectPath });
+      const signUpResponse = await register(firstName, lastName, email, password);
+      // If email verification is enabled, Supabase will not return an active session immediately
+      if (signUpResponse && !signUpResponse.session) {
+        setIsSubmitted(true);
+      } else {
+        // Automatically logged in (verification is disabled), navigate directly
+        navigate({ to: redirectPath });
+      }
     } catch (err: any) {
       setError(err.message || "Failed to create account. Please try again.");
     }
   };
+
+  if (isSubmitted) {
+    return (
+      <div className="pt-32 pb-24 min-h-[80vh] flex flex-col justify-center animate-in fade-in duration-500 bg-[var(--color-ivory)]">
+        <div className="mx-auto max-w-[400px] w-full px-6">
+          <div className="bg-[var(--color-cream)] p-10 border border-border shadow-[var(--shadow-soft)] text-center space-y-6">
+            <span className="gold-divider mb-4">Verification Sent</span>
+            <h1 className="font-display text-3xl text-foreground uppercase tracking-widest">Check Your Inbox</h1>
+            <p className="text-sm text-muted-foreground font-serif italic leading-relaxed">
+              We have sent a secure verification link to <strong className="text-foreground">{email}</strong>. Please check your inbox and click the link to confirm your account and log in.
+            </p>
+            <div className="pt-4 border-t border-border/50">
+              <Link to="/login" search={{ redirect: redirectPath }} className="btn-luxury w-full text-center block">
+                Proceed to Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-32 pb-24 min-h-[80vh] flex flex-col justify-center animate-in fade-in duration-500">

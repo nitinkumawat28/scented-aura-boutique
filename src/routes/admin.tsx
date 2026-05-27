@@ -4,7 +4,7 @@ import { useProductStore } from "@/store/products";
 import { useSiteInfoStore } from "@/store/siteInfo";
 import { useOrderStore } from "@/store/orders";
 import { toast } from "sonner";
-import { isSupabaseConfigured, supabaseUrl } from "@/lib/supabase";
+import { isSupabaseConfigured, supabaseUrl, supabase } from "@/lib/supabase";
 import { 
   LayoutDashboard, 
   Package, 
@@ -28,9 +28,15 @@ import {
   ResponsiveContainer 
 } from "recharts";
 
+import { ProtectedAdminRoute } from "@/components/ProtectedAdminRoute";
+
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — The Scented Aura" }] }),
-  component: AdminPage,
+  component: () => (
+    <ProtectedAdminRoute>
+      <AdminPage defaultTab="dashboard" />
+    </ProtectedAdminRoute>
+  ),
 });
 
 const detailedSalesData = Array.from({ length: 30 }, (_, i) => ({
@@ -102,7 +108,7 @@ const compressImage = (file: File, maxWidth = 800, maxHeight = 800, quality = 0.
   });
 };
 
-function AdminPage() {
+export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string }) {
   const productsList = useProductStore((s) => s.products);
   const addProduct = useProductStore((s) => s.addProduct);
   const updateProduct = useProductStore((s) => s.updateProduct);
@@ -125,10 +131,9 @@ function AdminPage() {
   const totalRevenue = ordersList.reduce((sum, o) => sum + o.total, 0);
   const totalOrders = ordersList.length;
 
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [showUpload, setShowUpload] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   
@@ -139,10 +144,6 @@ function AdminPage() {
   const [newTagline, setNewTagline] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-  
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const [draftSiteInfo, setDraftSiteInfo] = useState({
     aboutTitle: siteInfo.aboutTitle,
@@ -201,14 +202,7 @@ function AdminPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email === "admin@scented-aura.com" && password === "admin123") {
-      setIsAuthenticated(true);
-    } else {
-      setError("Invalid admin credentials. (Hint: admin@scented-aura.com / admin123)");
-    }
-  };
+
 
   const handlePublish = async () => {
     if (!newName) return;
@@ -266,35 +260,7 @@ function AdminPage() {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="bg-[var(--color-cream)] p-10 border border-border shadow-[var(--shadow-soft)] w-full max-w-md animate-in fade-in zoom-in duration-300">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl text-foreground uppercase tracking-widest">Admin Portal</h1>
-            <p className="text-xs text-muted-foreground mt-2 uppercase tracking-widest">Restricted Access</p>
-          </div>
-          
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">Email Address</label>
-              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-transparent border border-border px-4 py-3 outline-none focus:border-[var(--color-gold)] text-foreground" />
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">Password</label>
-              <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-transparent border border-border px-4 py-3 outline-none focus:border-[var(--color-gold)] text-foreground" />
-            </div>
-            
-            {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
-            
-            <button type="submit" className="w-full bg-[var(--color-gold-deep)] text-white py-4 text-sm font-medium uppercase tracking-widest hover:bg-[var(--color-gold-hover)] transition-colors mt-2">
-              Login to Dashboard
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen flex">
@@ -329,8 +295,8 @@ function AdminPage() {
           </button>
         </nav>
         <div className="p-4 border-t border-border">
-          <button onClick={() => {
-            setIsAuthenticated(false);
+          <button onClick={async () => {
+            await supabase.auth.signOut();
             navigate({ to: "/" });
           }} className="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium tracking-wide text-red-500 hover:bg-red-50 transition-colors">
             <LogOut size={18} /> Logout
