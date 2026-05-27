@@ -1,11 +1,11 @@
-import royalOud from "@/assets/products/royal-oud.png";
-import kashmiriSaffron from "@/assets/products/kashmiri-saffron.png";
-import mograAbsolute from "@/assets/products/mogra-absolute.png";
-import mysoreSandalwood from "@/assets/products/mysore-sandalwood.png";
-import darjeelingTea from "@/assets/products/darjeeling-tea.png";
-import malabarSpice from "@/assets/products/malabar-spice.png";
-import monsoonRain from "@/assets/products/monsoon-rain.png";
-import varanasiRose from "@/assets/products/varanasi-rose.png";
+import royalOud from "@/assets/products/royal-oud.webp";
+import kashmiriSaffron from "@/assets/products/kashmiri-saffron.webp";
+import mograAbsolute from "@/assets/products/mogra-absolute.webp";
+import mysoreSandalwood from "@/assets/products/mysore-sandalwood.webp";
+import darjeelingTea from "@/assets/products/darjeeling-tea.webp";
+import malabarSpice from "@/assets/products/malabar-spice.webp";
+import monsoonRain from "@/assets/products/monsoon-rain.webp";
+import varanasiRose from "@/assets/products/varanasi-rose.webp";
 
 export interface Product {
   id: string;

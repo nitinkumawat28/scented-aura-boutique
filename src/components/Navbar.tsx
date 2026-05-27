@@ -66,6 +66,7 @@ export function Navbar() {
             <Link
               key={i}
               to={l.to}
+              preload="intent"
               className="luxury-link text-foreground/80 hover:text-foreground"
             >
               {l.label}
@@ -113,7 +114,7 @@ export function Navbar() {
         <div className="md:hidden border-t border-border bg-ivory/95 backdrop-blur-md">
           <nav className="flex flex-col px-6 py-6 gap-5">
             {links.map((l, i) => (
-              <Link key={i} to={l.to} className="luxury-link text-foreground">
+              <Link key={i} to={l.to} preload="intent" className="luxury-link text-foreground">
                 {l.label}
               </Link>
             ))}

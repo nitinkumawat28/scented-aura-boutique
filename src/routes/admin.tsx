@@ -45,6 +45,63 @@ const mockOrders = [
   { id: "ORD-1155", customer: "Rahul Verma", date: "2026-05-14", total: 15500, status: "Shipped", items: 1 },
   { id: "ORD-1156", customer: "Neha Gupta", date: "2026-05-15", total: 32000, status: "Pending", items: 3 },
 ];
+
+/**
+ * Compresses an image file client-side using HTML5 Canvas
+ */
+const compressImage = (file: File, maxWidth = 800, maxHeight = 800, quality = 0.7): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(event.target?.result as string);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => {
+        resolve(event.target?.result as string);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 function AdminPage() {
   const productsList = useProductStore((s) => s.products);
   const addProduct = useProductStore((s) => s.addProduct);
@@ -158,11 +215,16 @@ function AdminPage() {
     
     let imageUrl = undefined;
     if (mediaFiles.length > 0) {
-      imageUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(mediaFiles[0]);
-      });
+      try {
+        imageUrl = await compressImage(mediaFiles[0]);
+      } catch (err) {
+        console.error("Image compression failed, falling back to original upload", err);
+        imageUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(mediaFiles[0]);
+        });
+      }
     }
     
     try {

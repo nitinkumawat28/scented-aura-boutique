@@ -8,6 +8,10 @@ import { useProductStore } from "@/store/products";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/shop")({
+  loader: async () => {
+    // Prefetch products data in the background so it's ready before routing completes
+    await useProductStore.getState().fetchProducts();
+  },
   head: () => ({
     meta: [
       { title: "Shop — The Scented Aura" },

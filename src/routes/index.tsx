@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import heroImg from "@/assets/hero-perfume.png";
+import heroImg from "@/assets/hero-perfume.webp";
 import storyImg from "@/assets/brand-story.jpg";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
@@ -55,10 +55,10 @@ function HomePage() {
               quiet sophistication of an evening unfolding in candlelight.
             </p>
             <div className="mt-12 flex flex-wrap gap-4">
-              <Link to="/shop" className="btn-luxury">
+              <Link to="/shop" preload="intent" className="btn-luxury">
                 Explore Collection
               </Link>
-              <Link to="/shop" className="btn-outline-luxury">
+              <Link to="/shop" preload="intent" className="btn-outline-luxury">
                 Shop Luxury Scents
               </Link>
             </div>
@@ -137,7 +137,7 @@ function HomePage() {
           )}
 
           <div className="text-center mt-20">
-            <Link to="/shop" className="luxury-link text-foreground">
+            <Link to="/shop" preload="intent" className="luxury-link text-foreground">
               View Full Collection →
             </Link>
           </div>

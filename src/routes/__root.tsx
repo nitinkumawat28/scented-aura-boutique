@@ -124,6 +124,21 @@ function RootComponent() {
   const setUser = useUser((s) => s.setUser);
 
   useEffect(() => {
+    // 0. Clear bloated legacy stores from localStorage to prevent QuotaExceededError crashes
+    if (typeof window !== "undefined") {
+      const keysToClear = ["scented-aura-products", "scented-aura-orders"];
+      keysToClear.forEach(key => {
+        if (localStorage.getItem(key)) {
+          try {
+            localStorage.removeItem(key);
+            console.log(`Cleared legacy localStorage cache key: ${key}`);
+          } catch (e) {
+            console.error(`Failed to clear localStorage key "${key}":`, e);
+          }
+        }
+      });
+    }
+
     // 1. Recover session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
