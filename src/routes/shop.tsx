@@ -6,10 +6,6 @@ import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
 
 export const Route = createFileRoute("/shop")({
-  loader: () => {
-    // Prefetch products data in the background without blocking routing
-    useProductStore.getState().fetchProducts().catch(console.error);
-  },
   head: () => ({
     meta: [
       { title: "Shop — The Scented Aura" },
