@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { orderService, Order } from "@/services/orders";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
@@ -13,9 +12,8 @@ interface OrderState {
 }
 
 export const useOrderStore = create<OrderState>()(
-  persist(
-    (set, get) => ({
-      orders: [],
+  (set, get) => ({
+    orders: [],
       isLoading: false,
       error: null,
 
@@ -76,9 +74,5 @@ export const useOrderStore = create<OrderState>()(
           throw err;
         }
       }
-    }),
-    {
-      name: "scented-aura-orders",
-    }
-  )
+    })
 );

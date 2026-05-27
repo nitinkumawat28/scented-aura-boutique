@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { products as initialProducts } from "@/data/products";
 import { productService } from "@/services/products";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -33,49 +32,56 @@ interface ProductState {
 }
 
 export const useProductStore = create<ProductState>()(
-  persist(
-    (set, get) => ({
-      products: initialProducts.map(p => ({ ...p, intensity: "Medium" })), // Fallback local data cache
-      isLoading: false,
-      error: null,
-      
-      fetchProducts: async () => {
-        if (!isSupabaseConfigured) {
-          console.warn("Supabase is not configured. Falling back to local data.");
+  (set, get) => ({
+    products: initialProducts.map(p => ({ ...p, intensity: "Medium" })), // Fallback local data cache
+    isLoading: false,
+    error: null,
+    
+    fetchProducts: async () => {
+      if (!isSupabaseConfigured) {
+        console.warn("Supabase is not configured. Falling back to local data.");
+        set({ isLoading: false });
+        return;
+      }
+
+      const hasProducts = get().products.length > 0;
+      set({ isLoading: !hasProducts, error: null });
+      try {
+        const data = await productService.getProducts();
+        if (data && data.length > 0) {
+          set({ products: data, isLoading: false });
+        } else {
           set({ isLoading: false });
-          return;
         }
 
-        const hasProducts = get().products.length > 0;
-        set({ isLoading: !hasProducts, error: null });
-        try {
-          const data = await productService.getProducts();
-          if (data && data.length > 0) {
-            set({ products: data, isLoading: false });
-          } else {
-            set({ isLoading: false });
-          }
+        // Enable Supabase Realtime postgres listener on public.products changes (SSR safe)
+        if (typeof window !== "undefined") {
+          const existingChannels = supabase.getChannels();
+          const channelName = "realtime-products";
+          const alreadySubscribed = existingChannels.some(ch => ch.name === channelName);
 
-          // Enable Supabase Realtime postgres listener on public.products changes
-          supabase
-            .channel("realtime-products")
-            .on("postgres_changes", { event: "*", schema: "public", table: "products" }, async (payload) => {
-              console.log("Realtime products update received:", payload);
-              try {
-                const freshData = await productService.getProducts();
-                if (freshData && freshData.length > 0) {
-                  set({ products: freshData });
+          if (!alreadySubscribed) {
+            supabase
+              .channel(channelName)
+              .on("postgres_changes", { event: "*", schema: "public", table: "products" }, async (payload) => {
+                console.log("Realtime products update received:", payload);
+                try {
+                  const freshData = await productService.getProducts();
+                  if (freshData && freshData.length > 0) {
+                    set({ products: freshData });
+                  }
+                } catch (fetchErr) {
+                  console.error("Error refreshing realtime products data:", fetchErr);
                 }
-              } catch (fetchErr) {
-                console.error("Error refreshing realtime products data:", fetchErr);
-              }
-            })
-            .subscribe();
-        } catch (err: any) {
-          console.error("Exception during fetching Supabase products:", err);
-          set({ error: err.message || "Failed to fetch products", isLoading: false });
+              })
+              .subscribe();
+          }
         }
-      },
+      } catch (err: any) {
+        console.error("Exception during fetching Supabase products:", err);
+        set({ error: err.message || "Failed to fetch products", isLoading: false });
+      }
+    },
 
       addProduct: async (p) => {
         set({ isLoading: true, error: null });
@@ -142,10 +148,5 @@ export const useProductStore = create<ProductState>()(
           throw err;
         }
       },
-    }),
-
-    {
-      name: 'scented-aura-products',
-    }
-  )
+    })
 );
