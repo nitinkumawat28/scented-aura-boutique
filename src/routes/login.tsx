@@ -34,7 +34,7 @@ function LoginPage() {
       if (typeof login !== "function") {
         throw new Error(`login is not a function (typeof login = ${typeof login})`);
       }
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       // Clean redirect upon successful Supabase authentication
       navigate({ to: redirectPath });
     } catch (err: any) {

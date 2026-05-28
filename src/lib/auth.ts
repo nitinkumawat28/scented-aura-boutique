@@ -22,12 +22,13 @@ export async function isAdmin(id: string | undefined | null, email?: string | un
       if (!error && data) return true;
     }
 
-    // 2. Fallback to check by email if available
+    // 2. Fallback to check by email if available (case-insensitive & trimmed)
     if (email) {
+      const cleanEmail = email.trim().toLowerCase();
       const { data, error } = await supabase
         .from("admin access")
         .select("email")
-        .eq("email", email)
+        .ilike("email", cleanEmail)
         .maybeSingle();
 
       if (!error && data) return true;
