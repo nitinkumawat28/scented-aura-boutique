@@ -86,11 +86,9 @@ export function Navbar() {
               <Search size={18} strokeWidth={1.4} />
             </button>
           )}
-          {isAdmin && (
-            <Link to="/admin" aria-label="Admin Dashboard" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
-              <Settings size={18} strokeWidth={1.4} />
-            </Link>
-          )}
+          <Link to="/admin" aria-label="Admin Dashboard" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
+            <Settings size={18} strokeWidth={1.4} />
+          </Link>
           <Link to={user ? "/profile" : "/login"} aria-label="Account" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
             <User size={18} strokeWidth={1.4} />
           </Link>
@@ -128,14 +126,12 @@ export function Navbar() {
             >
               <User size={16} strokeWidth={1.4} /> {user ? "My Profile" : "Sign In / Register"}
             </Link>
-            {isAdmin && (
-              <Link 
-                to="/admin" 
-                className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm"
-              >
-                <Settings size={16} strokeWidth={1.4} /> Admin Dashboard
-              </Link>
-            )}
+            <Link 
+              to="/admin" 
+              className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm"
+            >
+              <Settings size={16} strokeWidth={1.4} /> Admin Dashboard
+            </Link>
           </nav>
         </div>
       )}
