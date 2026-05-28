@@ -1,27 +1,39 @@
 import { supabase } from "./supabase";
 
 /**
- * Checks if the given email is in the allowed "admin access" table.
+ * Checks if the given user ID or email is in the allowed "admin access" table.
  * 
+ * @param id - The auth user ID to check.
  * @param email - The email to check.
- * @returns A promise that resolves to true if the email is an admin, false otherwise.
+ * @returns A promise that resolves to true if authorized, false otherwise.
  */
-export async function isAdmin(email: string | undefined | null): Promise<boolean> {
-  if (!email) return false;
+export async function isAdmin(id: string | undefined | null, email?: string | undefined | null): Promise<boolean> {
+  if (!id && !email) return false;
 
   try {
-    const { data, error } = await supabase
-      .from("admin access")
-      .select("email")
-      .eq("email", email)
-      .maybeSingle();
+    // 1. Check by user ID first if available
+    if (id) {
+      const { data, error } = await supabase
+        .from("admin access")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Error verifying admin credentials:", error);
-      return false;
+      if (!error && data) return true;
     }
 
-    return !!data;
+    // 2. Fallback to check by email if available
+    if (email) {
+      const { data, error } = await supabase
+        .from("admin access")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (!error && data) return true;
+    }
+
+    return false;
   } catch (err) {
     console.error("Exception checking admin credentials:", err);
     return false;
