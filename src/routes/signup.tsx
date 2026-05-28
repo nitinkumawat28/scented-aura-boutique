@@ -37,7 +37,7 @@ function SignupPage() {
     }
 
     try {
-      const signUpResponse = await register(firstName, lastName, email, password);
+      const signUpResponse = await register(firstName, lastName, email.trim().toLowerCase(), password);
       // If email verification is enabled, Supabase will not return an active session immediately
       if (signUpResponse && !signUpResponse.session) {
         setIsSubmitted(true);
