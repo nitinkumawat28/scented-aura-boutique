@@ -6,10 +6,6 @@ import { ProductCard } from "@/components/ProductCard";
 import { useProductStore } from "@/store/products";
 
 export const Route = createFileRoute("/shop")({
-  loader: async () => {
-    // Prefetch products data in the background so it's ready before routing completes
-    await useProductStore.getState().fetchProducts();
-  },
   head: () => ({
     meta: [
       { title: "Shop — The Scented Aura" },
@@ -24,6 +20,11 @@ const sorts = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"]
 function ShopPage() {
   const products = useProductStore((s) => s.products);
   const isLoading = useProductStore((s) => s.isLoading);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState("Featured");
   const [dropdownOpen, setDropdownOpen] = useState(false);

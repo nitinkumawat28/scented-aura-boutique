@@ -22,7 +22,7 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
         // 1. Get logged in user from Supabase Auth
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session?.user || !session.user.email) {
+        if (!session?.user) {
           if (active) {
             setIsAuthorized(false);
             setLoading(false);
@@ -32,8 +32,8 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
           return;
         }
 
-        // 2. Fetch admin access permission using the new email-based list check
-        const adminStatus = await isAdmin(session.user.email);
+        // 2. Fetch admin access permission checking both ID and email
+        const adminStatus = await isAdmin(session.user.id, session.user.email);
 
         // 3. Allow access only if email exists in the 'admin access' table
         if (active) {

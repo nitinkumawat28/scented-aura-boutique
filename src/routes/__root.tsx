@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/store/user";
+import { isAdmin } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
@@ -122,6 +123,7 @@ function RootComponent() {
   const showFooter = !isAdmin && pathname !== "/login" && pathname !== "/signup";
   
   const setUser = useUser((s) => s.setUser);
+  const setIsAdmin = useUser((s) => s.setIsAdmin);
 
   useEffect(() => {
     // 0. Clear bloated legacy stores from localStorage to prevent QuotaExceededError crashes
@@ -152,8 +154,13 @@ function RootComponent() {
           mobile: metadata.mobile || "",
           addresses: metadata.addresses || [],
         });
+        
+        isAdmin(session.user.id, session.user.email).then((adminStatus) => {
+          setIsAdmin(adminStatus);
+        });
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
     });
 
@@ -170,15 +177,20 @@ function RootComponent() {
           mobile: metadata.mobile || "",
           addresses: metadata.addresses || [],
         });
+        
+        isAdmin(session.user.id, session.user.email).then((adminStatus) => {
+          setIsAdmin(adminStatus);
+        });
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser]);
+  }, [setUser, setIsAdmin]);
 
   return (
     <QueryClientProvider client={queryClient}>

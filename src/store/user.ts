@@ -33,6 +33,7 @@ interface UserState {
   user: User | null;
   orders: Order[];
   isLoading: boolean;
+  isAdmin: boolean;
   login: (email: string, password?: string) => Promise<any>;
   register: (firstName: string, lastName: string, email: string, password?: string) => Promise<any>;
   logout: () => Promise<void>;
@@ -41,15 +42,18 @@ interface UserState {
   addOrder: (order: Omit<Order, "id" | "date" | "status">) => Promise<void>;
   setUser: (user: User | null) => void;
   setOrders: (orders: Order[]) => void;
+  setIsAdmin: (isAdmin: boolean) => void;
 }
 
 export const useUser = create<UserState>((set, get) => ({
   user: null,
   orders: [],
   isLoading: false,
+  isAdmin: false,
 
   setUser: (user) => set({ user }),
   setOrders: (orders) => set({ orders }),
+  setIsAdmin: (isAdmin) => set({ isAdmin }),
 
   login: async (email, password) => {
     set({ isLoading: true });
@@ -95,7 +99,7 @@ export const useUser = create<UserState>((set, get) => ({
   logout: async () => {
     set({ isLoading: true });
     const { error } = await supabase.auth.signOut();
-    set({ isLoading: false, user: null, orders: [] });
+    set({ isLoading: false, user: null, orders: [], isAdmin: false });
     if (error) {
       throw new Error(error.message);
     }
