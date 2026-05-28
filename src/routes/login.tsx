@@ -23,17 +23,24 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [errorStack, setErrorStack] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorStack(null);
 
     try {
+      if (typeof login !== "function") {
+        throw new Error(`login is not a function (typeof login = ${typeof login})`);
+      }
       await login(email, password);
       // Clean redirect upon successful Supabase authentication
       navigate({ to: redirectPath });
     } catch (err: any) {
+      console.error("Login onSubmit error caught:", err);
       setError(err.message || "Invalid email or password. Please try again.");
+      setErrorStack(err.stack || "No stack trace available.");
     }
   };
 
@@ -53,9 +60,16 @@ function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-3">
-            <AlertCircle size={16} className="flex-shrink-0" />
-            <span>{error}</span>
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={16} className="flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+            {errorStack && (
+              <pre className="mt-2 p-2 bg-black/10 text-[10px] overflow-auto max-h-40 whitespace-pre-wrap font-mono text-left select-text">
+                {errorStack}
+              </pre>
+            )}
           </div>
         )}
 
