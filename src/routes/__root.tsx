@@ -155,13 +155,31 @@ function RootComponent() {
           addresses: metadata.addresses || [],
         });
         
-        isAdmin(session.user.id, session.user.email).then((adminStatus) => {
-          setIsAdmin(adminStatus);
-        });
+        try {
+          if (typeof isAdmin === "function") {
+            isAdmin(session.user.id, session.user.email).then((adminStatus) => {
+              if (typeof setIsAdmin === "function") {
+                setIsAdmin(adminStatus);
+              } else {
+                console.error("setIsAdmin is not a function:", setIsAdmin);
+              }
+            }).catch((err) => {
+              console.error("Error in isAdmin check on mount:", err);
+            });
+          } else {
+            console.error("isAdmin is not a function:", isAdmin);
+          }
+        } catch (e) {
+          console.error("Synchronous exception in isAdmin on mount:", e);
+        }
       } else {
         setUser(null);
-        setIsAdmin(false);
+        if (typeof setIsAdmin === "function") {
+          setIsAdmin(false);
+        }
       }
+    }).catch((err) => {
+      console.error("Error in getSession:", err);
     });
 
     // 2. Listen to real-time auth changes
@@ -178,12 +196,28 @@ function RootComponent() {
           addresses: metadata.addresses || [],
         });
         
-        isAdmin(session.user.id, session.user.email).then((adminStatus) => {
-          setIsAdmin(adminStatus);
-        });
+        try {
+          if (typeof isAdmin === "function") {
+            isAdmin(session.user.id, session.user.email).then((adminStatus) => {
+              if (typeof setIsAdmin === "function") {
+                setIsAdmin(adminStatus);
+              } else {
+                console.error("setIsAdmin is not a function:", setIsAdmin);
+              }
+            }).catch((err) => {
+              console.error("Error in isAdmin check on auth change:", err);
+            });
+          } else {
+            console.error("isAdmin is not a function:", isAdmin);
+          }
+        } catch (e) {
+          console.error("Synchronous exception in isAdmin on auth change:", e);
+        }
       } else {
         setUser(null);
-        setIsAdmin(false);
+        if (typeof setIsAdmin === "function") {
+          setIsAdmin(false);
+        }
       }
     });
 
