@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useUser } from "@/store/user";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -24,11 +25,36 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [errorStack, setErrorStack] = useState<string | null>(null);
+  
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResending(true);
+    setError(null);
+    setResendSuccess(false);
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+      });
+      if (resendError) {
+        throw resendError;
+      }
+      setResendSuccess(true);
+    } catch (err: any) {
+      setError(err.message || "Failed to resend confirmation email.");
+    } finally {
+      setResending(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setErrorStack(null);
+    setResendSuccess(false);
 
     try {
       if (typeof login !== "function") {
@@ -60,12 +86,35 @@ function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex flex-col gap-2">
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <AlertCircle size={16} className="flex-shrink-0" />
               <span>{error}</span>
             </div>
-            {errorStack && (
+
+            {error.toLowerCase().includes("email not confirmed") && (
+              <div className="pt-2 border-t border-destructive/25 flex flex-col gap-2">
+                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                  Your email has not been verified yet. Please check your inbox or click below to receive a new verification link.
+                </p>
+                {resendSuccess ? (
+                  <span className="text-[11px] text-[var(--color-gold-deep)] font-semibold uppercase tracking-wider animate-in fade-in duration-300">
+                    ✓ Verification link resent successfully!
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={resending}
+                    onClick={handleResendConfirmation}
+                    className="self-start text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-[var(--color-gold-hover)] underline underline-offset-4 disabled:opacity-50 transition-colors cursor-pointer"
+                  >
+                    {resending ? "Resending Link..." : "Resend Verification Link"}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {errorStack && !error.toLowerCase().includes("email not confirmed") && (
               <pre className="mt-2 p-2 bg-black/10 text-[10px] overflow-auto max-h-40 whitespace-pre-wrap font-mono text-left select-text">
                 {errorStack}
               </pre>

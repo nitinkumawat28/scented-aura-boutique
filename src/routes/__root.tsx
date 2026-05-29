@@ -118,9 +118,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const isAdmin = pathname.startsWith("/admin");
-  const showNavbar = !isAdmin;
-  const showFooter = !isAdmin && pathname !== "/login" && pathname !== "/signup";
+  const isAdminRoute = pathname.startsWith("/admin");
+  const showNavbar = !isAdminRoute;
+  const showFooter = !isAdminRoute && pathname !== "/login" && pathname !== "/signup";
   
   const setUser = useUser((s) => s.setUser);
   const setIsAdmin = useUser((s) => s.setIsAdmin);
@@ -229,7 +229,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {showNavbar && <Navbar />}
-      <main className={isAdmin ? "min-h-screen bg-[var(--color-secondary)]/30" : "min-h-screen"}>
+      <main className={isAdminRoute ? "min-h-screen bg-[var(--color-secondary)]/30" : "min-h-screen"}>
         <Outlet />
       </main>
       {showFooter && <Footer />}
