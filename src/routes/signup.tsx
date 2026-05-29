@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useUser } from "@/store/user";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -26,6 +27,31 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResending(true);
+    setResendError(null);
+    setResendSuccess(false);
+    try {
+      const { error: err } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+      });
+      if (err) {
+        throw err;
+      }
+      setResendSuccess(true);
+    } catch (err: any) {
+      setResendError(err.message || "Failed to resend confirmation email.");
+    } finally {
+      setResending(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +86,33 @@ function SignupPage() {
             <p className="text-sm text-muted-foreground font-serif italic leading-relaxed">
               We have sent a secure verification link to <strong className="text-foreground">{email}</strong>. Please check your inbox and click the link to confirm your account and log in.
             </p>
-            <div className="pt-4 border-t border-border/50">
+            
+            <div className="pt-4 border-t border-border/50 space-y-4">
+              {resendSuccess ? (
+                <div className="p-3 bg-emerald-50/50 border border-emerald-200/50 text-emerald-800 text-[11px] font-semibold uppercase tracking-wider rounded">
+                  ✓ Verification link resent successfully!
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Didn't receive the email?
+                  </p>
+                  <button
+                    type="button"
+                    disabled={resending}
+                    onClick={handleResendConfirmation}
+                    className="text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-[var(--color-gold-hover)] underline underline-offset-4 disabled:opacity-50 transition-colors cursor-pointer"
+                  >
+                    {resending ? "Resending Link..." : "Resend Verification Link"}
+                  </button>
+                  {resendError && (
+                    <p className="text-[10px] text-destructive mt-1">
+                      {resendError}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <Link to="/login" search={{ redirect: redirectPath }} className="btn-luxury w-full text-center block">
                 Proceed to Login
               </Link>
