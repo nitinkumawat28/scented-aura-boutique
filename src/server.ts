@@ -69,8 +69,15 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const url = new URL(request.url);
-      if (url.pathname === "/google391c3b01117c227f.html") {
+      const urlString = request.url || "";
+      const xMatchedPath = request.headers.get("x-matched-path") || "";
+      const xForwardedUri = request.headers.get("x-forwarded-uri") || "";
+
+      if (
+        urlString.includes("google391c3b01117c227f.html") ||
+        xMatchedPath.includes("google391c3b01117c227f.html") ||
+        xForwardedUri.includes("google391c3b01117c227f.html")
+      ) {
         return new Response("google-site-verification: google391c3b01117c227f.html", {
           status: 200,
           headers: {
