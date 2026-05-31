@@ -347,7 +347,7 @@ export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string })
               </div>
             </div>
 
-            <div className="bg-[var(--color-cream)] p-8 border border-border shadow-sm h-[450px]">
+            <div className="bg-[var(--color-cream)] p-4 sm:p-8 border border-border shadow-sm h-[300px] sm:h-[400px] lg:h-[450px]">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="font-medium text-foreground uppercase tracking-widest text-sm">30-Day Revenue Trend</h3>
                 <span className="text-xs text-muted-foreground">May 1 - May 30</span>
@@ -478,7 +478,8 @@ export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string })
               </div>
             )}
 
-            <div className="bg-[var(--color-cream)] border border-border shadow-sm overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-[var(--color-cream)] border border-border shadow-sm overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[600px]">
                 <thead className="bg-muted/30 border-b border-border">
                   <tr>
@@ -538,6 +539,65 @@ export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string })
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Cards View */}
+            <div className="md:hidden space-y-4">
+              {productsList.length === 0 ? (
+                <div className="text-center py-10 bg-[var(--color-cream)] border border-border text-muted-foreground text-sm font-serif italic">
+                  No products found in the database.
+                </div>
+              ) : (
+                productsList.map((p) => (
+                  <div key={p.id} className="bg-[var(--color-cream)] p-5 border border-border shadow-sm space-y-3">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-semibold text-base text-foreground leading-tight">{p.name}</h4>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{p.category}</p>
+                      </div>
+                      <span className="font-semibold text-foreground text-sm flex-shrink-0">₹{p.price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2.5 border-t border-border/40">
+                      <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold ${(p.stock || 0) < 20 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                        {p.stock} in stock
+                      </span>
+                      <div className="flex gap-4">
+                        <button 
+                          onClick={() => {
+                            setEditingProductId(p.id);
+                            setNewName(p.name);
+                            setNewCat(p.category);
+                            setNewPrice(p.price.toString());
+                            setNewStock(p.stock?.toString() || "0");
+                            setNewTagline(p.tagline || "");
+                            setNewDescription(p.description || "");
+                            setShowUpload(true);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="text-muted-foreground hover:text-foreground uppercase tracking-widest text-[10px] font-bold py-1 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={async () => {
+                            if (confirm(`Are you sure you want to delete "${p.name}"?`)) {
+                              try {
+                                await deleteProduct(p.id);
+                                toast.success(`"${p.name}" deleted successfully!`);
+                              } catch (err: any) {
+                                toast.error(`Failed to delete product: ${err.message || "Unknown error"}`);
+                              }
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-700 uppercase tracking-widest text-[10px] font-bold py-1 cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
 
@@ -545,7 +605,8 @@ export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string })
           <div className="space-y-8 animate-in fade-in duration-300">
             <h1 className="font-display text-4xl text-foreground pb-4 border-b border-border">Order History</h1>
             
-            <div className="bg-[var(--color-cream)] border border-border shadow-sm overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-[var(--color-cream)] border border-border shadow-sm overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[600px]">
                 <thead className="bg-muted/30 border-b border-border">
                   <tr>
@@ -604,9 +665,66 @@ export function AdminPage({ defaultTab = "dashboard" }: { defaultTab?: string })
                       </td>
                     </tr>
                   ))}
-
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="md:hidden space-y-4">
+              {ordersList.length === 0 ? (
+                <div className="text-center py-10 bg-[var(--color-cream)] border border-border text-muted-foreground text-sm font-serif italic">
+                  No orders found in database.
+                </div>
+              ) : (
+                ordersList.map((o) => (
+                  <div key={o.id} className="bg-[var(--color-cream)] p-5 border border-border shadow-sm space-y-3 animate-in fade-in duration-200">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-semibold text-base text-foreground leading-tight">{o.id}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{o.customer}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {new Date(o.created_at || o.date).toLocaleDateString("en-IN", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <span className="font-semibold text-foreground text-sm flex-shrink-0">₹{o.total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2.5 border-t border-border/40">
+                      <select
+                        value={o.status}
+                        onChange={async (e) => {
+                          try {
+                            await updateOrderStatus(o.id, e.target.value);
+                            toast.success(`Order ${o.id} status updated to ${e.target.value}`);
+                          } catch (err: any) {
+                            toast.error(`Failed to update status: ${err.message || "Unknown error"}`);
+                          }
+                        }}
+                        className={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded border-none outline-none cursor-pointer ${
+                          o.status === "Delivered" ? "bg-green-100 text-green-700" :
+                          o.status === "Shipped" ? "bg-blue-100 text-blue-700" :
+                          o.status === "Processing" ? "bg-amber-100 text-amber-700" :
+                          "bg-[var(--color-gold-deep)]/20 text-[var(--color-gold-deep)]"
+                        }`}
+                      >
+                        <option value="Pending" className="text-foreground bg-background">Pending</option>
+                        <option value="Processing" className="text-foreground bg-background">Processing</option>
+                        <option value="Shipped" className="text-foreground bg-background">Shipped</option>
+                        <option value="Delivered" className="text-foreground bg-background">Delivered</option>
+                      </select>
+                      <button 
+                        onClick={() => setSelectedOrder(o)}
+                        className="text-[var(--color-gold-deep)] hover:underline uppercase tracking-widest text-[10px] font-bold py-1 cursor-pointer"
+                      >
+                        View Invoice
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

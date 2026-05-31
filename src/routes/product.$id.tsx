@@ -132,11 +132,11 @@ function ProductPage() {
                 Olfactory <em className="italic font-serif">Pyramid</em>
               </h3>
               {(["top", "heart", "base"] as const).map((k) => (
-                <div key={k} className="grid grid-cols-[100px_1fr] gap-6 items-start py-5 border-t border-border">
+                <div key={k} className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-2 sm:gap-6 items-start py-5 border-t border-border">
                   <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-gold-deep)]">
                     {k === "top" ? "Top" : k === "heart" ? "Heart" : "Base"}
                   </p>
-                  <p className="font-serif italic text-muted-foreground text-lg">
+                  <p className="font-serif italic text-muted-foreground text-sm sm:text-base md:text-lg">
                     {product.notes[k].join(" · ")}
                   </p>
                 </div>

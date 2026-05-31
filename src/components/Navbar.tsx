@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { useUser } from "@/store/user";
+import { AnimatePresence, motion } from "framer-motion";
 
 const links = [
   { to: "/", label: "Home" },
@@ -46,7 +47,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 lg:px-12">
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden text-foreground p-2 -ml-2 hover:bg-foreground/5 active:bg-foreground/10 transition-colors rounded-full flex items-center justify-center outline-none cursor-pointer"
           onClick={() => setOpen((o) => !o)}
           aria-label="Menu"
         >
@@ -75,37 +76,37 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-5 text-foreground">
+        <div className="flex items-center gap-4 md:gap-5 text-foreground">
           {searchOpen ? (
             <form onSubmit={(e) => { e.preventDefault(); navigate({ to: '/shop' }); setSearchOpen(false); }} className="flex items-center border-b border-foreground/50 pb-1 mr-2 animate-in fade-in slide-in-from-right-4">
-               <input autoFocus type="text" placeholder="Search..." className="bg-transparent outline-none text-sm w-32 md:w-48 text-foreground" />
-               <button type="button" onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground"><X size={14} /></button>
+               <input autoFocus type="text" placeholder="Search..." className="bg-transparent outline-none text-sm w-20 xs:w-28 sm:w-32 md:w-48 text-foreground" />
+               <button type="button" onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground cursor-pointer"><X size={14} /></button>
             </form>
           ) : (
-            <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:text-[var(--color-gold-hover)] transition-colors">
+            <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:text-[var(--color-gold-hover)] transition-colors p-1 cursor-pointer">
               <Search size={18} strokeWidth={1.4} />
             </button>
           )}
           {isAdmin && (
-            <Link to="/admin" aria-label="Admin Dashboard" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors animate-in fade-in duration-300">
+            <Link to="/admin" aria-label="Admin Dashboard" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors animate-in fade-in duration-300 p-1">
               <Settings size={18} strokeWidth={1.4} />
             </Link>
           )}
-          <Link to={user ? "/profile" : "/login"} aria-label="Account" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors">
+          <Link to={user ? "/profile" : "/login"} aria-label="Account" className="hidden md:block hover:text-[var(--color-gold-hover)] transition-colors p-1">
             <User size={18} strokeWidth={1.4} />
           </Link>
-          <Link to="/wishlist" className="relative hover:text-[var(--color-gold-hover)] transition-colors" aria-label="Wishlist">
+          <Link to="/wishlist" className="relative hover:text-[var(--color-gold-hover)] transition-colors p-1" aria-label="Wishlist">
             <Heart size={18} strokeWidth={1.4} />
             {wishlistCount > 0 && (
-              <span className="absolute -top-2 -right-2 text-[10px] bg-[var(--color-gold-deep)] text-cream rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 text-[9px] bg-[var(--color-gold-deep)] text-cream rounded-full h-3.5 min-w-3.5 px-0.5 flex items-center justify-center font-semibold">
                 {wishlistCount}
               </span>
             )}
           </Link>
-          <Link to="/cart" className="relative hover:text-[var(--color-gold-hover)] transition-colors" aria-label="Cart">
+          <Link to="/cart" className="relative hover:text-[var(--color-gold-hover)] transition-colors p-1" aria-label="Cart">
             <ShoppingBag size={18} strokeWidth={1.4} />
             {count > 0 && (
-              <span className="absolute -top-2 -right-2 text-[10px] bg-foreground text-cream rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 text-[9px] bg-foreground text-cream rounded-full h-3.5 min-w-3.5 px-0.5 flex items-center justify-center font-semibold">
                 {count}
               </span>
             )}
@@ -113,32 +114,40 @@ export function Navbar() {
         </div>
       </div>
 
-      {open && (
-        <div className="md:hidden border-t border-border bg-ivory/95 backdrop-blur-md">
-          <nav className="flex flex-col px-6 py-6 gap-5">
-            {links.map((l, i) => (
-              <Link key={i} to={l.to} preload="intent" className="luxury-link text-foreground">
-                {l.label}
-              </Link>
-            ))}
-            <div className="h-px bg-border/60 my-2" />
-            <Link 
-              to={user ? "/profile" : "/login"} 
-              className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm"
-            >
-              <User size={16} strokeWidth={1.4} /> {user ? "My Profile" : "Sign In / Register"}
-            </Link>
-            {isAdmin && (
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="md:hidden border-t border-border bg-ivory/95 backdrop-blur-md overflow-hidden"
+          >
+            <nav className="flex flex-col px-6 py-6 gap-5">
+              {links.map((l, i) => (
+                <Link key={i} to={l.to} preload="intent" className="luxury-link text-foreground py-1">
+                  {l.label}
+                </Link>
+              ))}
+              <div className="h-px bg-border/60 my-2" />
               <Link 
-                to="/admin" 
-                className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm animate-in fade-in duration-300"
+                to={user ? "/profile" : "/login"} 
+                className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm py-1"
               >
-                <Settings size={16} strokeWidth={1.4} /> Admin Dashboard
+                <User size={16} strokeWidth={1.4} /> {user ? "My Profile" : "Sign In / Register"}
               </Link>
-            )}
-          </nav>
-        </div>
-      )}
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className="luxury-link flex items-center gap-3 text-foreground/90 hover:text-foreground font-serif italic text-sm py-1 animate-in fade-in duration-300"
+                >
+                  <Settings size={16} strokeWidth={1.4} /> Admin Dashboard
+                </Link>
+              )}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
