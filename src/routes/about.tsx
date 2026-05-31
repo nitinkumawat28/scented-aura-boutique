@@ -115,12 +115,12 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: i * 0.1 }}
-                className="grid grid-cols-[100px_1fr] gap-8 items-start pb-12 border-b border-border last:border-0"
+                className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-3 sm:gap-8 items-start pb-8 sm:pb-12 border-b border-border last:border-0"
               >
                 <p className="font-display text-3xl text-[var(--color-gold-hover)]">
                   {t.year}
                 </p>
-                <p className="font-serif text-lg text-muted-foreground leading-relaxed pt-2">
+                <p className="font-serif text-base sm:text-lg text-muted-foreground leading-relaxed pt-0 sm:pt-2">
                   {t.event}
                 </p>
               </motion.div>

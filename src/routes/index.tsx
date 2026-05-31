@@ -31,17 +31,17 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center pt-28 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-24 sm:pt-28 overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[var(--color-ivory)]" />
-        <div className="mx-auto max-w-[1400px] w-full px-6 lg:px-12 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="mx-auto max-w-[1400px] w-full px-6 lg:px-12 grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             className="order-2 lg:order-1"
           >
-            <span className="gold-divider mb-8">House of Perfume</span>
-            <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
+            <span className="gold-divider mb-4 sm:mb-8">House of Perfume</span>
+            <h1 className="font-display text-4xl xs:text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
               Discover the
               <br />
               Essence of
@@ -50,15 +50,15 @@ function HomePage() {
                 Timeless Luxury
               </em>
             </h1>
-            <p className="mt-8 max-w-md text-base md:text-lg text-muted-foreground font-serif italic leading-relaxed">
+            <p className="mt-5 sm:mt-8 max-w-md text-sm sm:text-base md:text-lg text-muted-foreground font-serif italic leading-relaxed">
               Crafted fragrances inspired by elegance, nature, and the
               quiet sophistication of an evening unfolding in candlelight.
             </p>
-            <div className="mt-12 flex flex-wrap gap-4">
-              <Link to="/shop" preload="intent" className="btn-luxury">
+            <div className="mt-8 sm:mt-12 flex flex-wrap gap-3 sm:gap-4">
+              <Link to="/shop" preload="intent" className="btn-luxury w-full xs:w-auto text-center">
                 Explore Collection
               </Link>
-              <Link to="/shop" preload="intent" className="btn-outline-luxury">
+              <Link to="/shop" preload="intent" className="btn-outline-luxury w-full xs:w-auto text-center">
                 Shop Luxury Scents
               </Link>
             </div>
@@ -70,7 +70,7 @@ function HomePage() {
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
             className="order-1 lg:order-2 relative"
           >
-            <div className="relative aspect-[4/5] overflow-hidden">
+            <div className="relative aspect-[16/10] sm:aspect-[4/5] overflow-hidden">
               <img
                 src={heroImg}
                 alt="Luxury perfume bottle with botanicals"
@@ -78,12 +78,12 @@ function HomePage() {
                 height={1920}
                 className="w-full h-full object-cover animate-float-slow"
               />
-              <div className="absolute -bottom-4 -left-4 hidden md:block">
-                <div className="bg-[var(--color-cream)] border border-border px-6 py-4 shadow-[var(--shadow-soft)]">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-deep)]">
+              <div className="absolute bottom-4 left-4 sm:-bottom-4 sm:-left-4 block scale-90 sm:scale-100 origin-bottom-left">
+                <div className="bg-[var(--color-cream)] border border-border px-4 py-2 sm:px-6 sm:py-4 shadow-[var(--shadow-soft)]">
+                  <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-deep)]">
                     New · 2026
                   </p>
-                  <p className="font-display text-lg text-foreground">Royal Oud</p>
+                  <p className="font-display text-sm sm:text-lg text-foreground">Royal Oud</p>
                 </div>
               </div>
             </div>
@@ -92,33 +92,33 @@ function HomePage() {
       </section>
 
       {/* FEATURED COLLECTION */}
-      <section className="py-32">
+      <section className="py-20 sm:py-32">
         <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.9 }}
-            className="text-center mb-20"
+            className="text-center mb-12 sm:mb-20"
           >
-            <span className="gold-divider mb-6">The Collection</span>
-            <h2 className="font-display text-4xl md:text-5xl text-foreground">
+            <span className="gold-divider mb-4 sm:mb-6">The Collection</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-foreground">
               Signature <em className="font-serif italic">Fragrances</em>
             </h2>
-            <p className="mt-5 max-w-xl mx-auto text-muted-foreground font-serif italic">
+            <p className="mt-4 sm:mt-5 max-w-xl mx-auto text-muted-foreground font-serif italic text-sm sm:text-base">
               Each bottle composed by hand in our Parisian atelier — a private
               chapter of scent waiting to be written upon your skin.
             </p>
           </motion.div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="animate-pulse space-y-4">
+                <div key={i} className="animate-pulse space-y-3 sm:space-y-4">
                   <div className="bg-muted/40 aspect-[4/5] w-full border border-border"></div>
-                  <div className="h-3 bg-muted/40 w-1/4 mx-auto"></div>
-                  <div className="h-5 bg-muted/40 w-2/3 mx-auto"></div>
-                  <div className="h-4 bg-muted/40 w-1/3 mx-auto"></div>
+                  <div className="h-2.5 bg-muted/40 w-1/3 mx-auto mt-2"></div>
+                  <div className="h-4 bg-muted/40 w-3/4 mx-auto"></div>
+                  <div className="h-3 bg-muted/40 w-1/2 mx-auto"></div>
                 </div>
               ))}
             </div>
@@ -129,14 +129,14 @@ function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {displayProducts.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
             </div>
           )}
 
-          <div className="text-center mt-20">
+          <div className="text-center mt-12 sm:mt-20">
             <Link to="/shop" preload="intent" className="luxury-link text-foreground">
               View Full Collection →
             </Link>

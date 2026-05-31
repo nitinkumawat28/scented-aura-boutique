@@ -39,46 +39,48 @@ function CartPage() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[100px_1fr_auto] gap-6 pb-8 border-b border-border"
+                  className="flex gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-border items-start"
                 >
-                  <div className="aspect-[4/5] bg-[var(--color-cream)] overflow-hidden border border-border">
+                  <div className="w-20 sm:w-[100px] aspect-[4/5] bg-[var(--color-cream)] overflow-hidden border border-border flex-shrink-0">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <div>
-                    <h3 className="font-display text-2xl text-foreground">{item.name}</h3>
-                    <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground mt-2">
-                      {item.size}
-                    </p>
-                    <p className="text-sm text-foreground mt-3">₹{item.price}</p>
-                    <div className="flex items-center border border-border w-fit mt-5">
-                      <button
-                        onClick={() => setQty(item.id, item.qty - 1)}
-                        className="px-3 py-2"
-                        aria-label="Decrease"
-                      >
-                        <Minus size={12} strokeWidth={1.4} />
-                      </button>
-                      <span className="px-3 text-sm w-8 text-center">{item.qty}</span>
-                      <button
-                        onClick={() => setQty(item.id, item.qty + 1)}
-                        className="px-3 py-2"
-                        aria-label="Increase"
-                      >
-                        <Plus size={12} strokeWidth={1.4} />
-                      </button>
+                  <div className="flex flex-col sm:flex-row flex-1 justify-between gap-3 sm:gap-6 w-full">
+                    <div>
+                      <h3 className="font-display text-lg sm:text-2xl text-foreground leading-tight">{item.name}</h3>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-muted-foreground mt-1.5 sm:mt-2">
+                        {item.size}
+                      </p>
+                      <p className="text-xs sm:text-sm text-foreground mt-1 sm:mt-3">₹{item.price}</p>
+                      <div className="flex items-center border border-border w-fit mt-3 sm:mt-5 bg-background">
+                        <button
+                          onClick={() => setQty(item.id, item.qty - 1)}
+                          className="px-2.5 py-1.5 sm:px-3 sm:py-2 hover:text-[var(--color-gold-hover)] transition-colors cursor-pointer"
+                          aria-label="Decrease"
+                        >
+                          <Minus size={11} strokeWidth={1.4} />
+                        </button>
+                        <span className="px-2 text-xs sm:text-sm w-8 text-center text-foreground font-medium">{item.qty}</span>
+                        <button
+                          onClick={() => setQty(item.id, item.qty + 1)}
+                          className="px-2.5 py-1.5 sm:px-3 sm:py-2 hover:text-[var(--color-gold-hover)] transition-colors cursor-pointer"
+                          aria-label="Increase"
+                        >
+                          <Plus size={11} strokeWidth={1.4} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right flex flex-col justify-between items-end">
-                    <button
-                      onClick={() => remove(item.id)}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Remove"
-                    >
-                      <X size={16} strokeWidth={1.4} />
-                    </button>
-                    <p className="font-display text-lg text-foreground">
-                      ₹{item.price * item.qty}
-                    </p>
+                    <div className="flex flex-row sm:flex-col justify-between sm:items-end items-center sm:text-right border-t sm:border-t-0 border-border/40 pt-3 sm:pt-0 w-full sm:w-auto">
+                      <button
+                        onClick={() => remove(item.id)}
+                        className="text-muted-foreground hover:text-foreground transition-colors p-1 order-2 sm:order-1 cursor-pointer"
+                        aria-label="Remove"
+                      >
+                        <X size={16} strokeWidth={1.4} />
+                      </button>
+                      <p className="font-display text-base sm:text-lg text-foreground order-1 sm:order-2">
+                        ₹{item.price * item.qty}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
