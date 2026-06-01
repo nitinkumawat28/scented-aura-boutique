@@ -50,7 +50,9 @@ export const useProductStore = create<ProductState>()(
       if (typeof window !== "undefined") {
         const existingChannels = supabase.getChannels();
         const channelName = "realtime-products";
-        const alreadySubscribed = existingChannels.some(ch => ch.name === channelName);
+        const alreadySubscribed = existingChannels.some(
+          (ch) => ch.topic === `realtime:${channelName}`
+        );
 
         if (!alreadySubscribed) {
           supabase
