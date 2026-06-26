@@ -8,13 +8,19 @@ This platform offers a seamless shopping experience for premium perfumes, comple
 
 ## ✨ Features
 
+### Customer Features
 - **🌸 Curated Fragrance Catalog**: Browse handcrafted perfumes with detailed notes and high-quality visuals.
+- **🔍 Olfactory Pyramid**: View detailed descriptions including top, heart, and base notes.
 - **🛒 Shopping Cart & Wishlist**: Easily manage items you wish to purchase or save for later.
 - **🔐 Secure User Authentication**: Powered by Supabase Auth (Sign up, Log in, Profile management).
-- **💼 Admin Dashboard**:
-  - Live product management (add, edit, delete fragrances).
-  - Real-time order tracking and management.
-- **⚡ Performance & SSR**: Built using TanStack Start and TanStack Router for ultra-fast, server-rendered routes.
+- **💳 Secure Checkout Workflow**: Seamless order placement and delivery address configuration.
+- **📱 Responsive Layout**: Fully optimized and responsive design for mobile, tablet, and desktop screens.
+
+### Admin Features
+- **💼 Protected Admin Dashboard**: High-level sales overview, order statistics, and transaction summaries.
+- **📦 Catalog Management**: Live product management (add, edit, delete fragrances).
+- **📋 Order Processing**: Real-time order tracking, status management, and updates.
+- **🔒 Access Control**: Role-based access control checking user authentication and credentials before granting dashboard access.
 
 ---
 
@@ -23,10 +29,19 @@ This platform offers a seamless shopping experience for premium perfumes, comple
 - **Frontend Core**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
 - **Routing & SSR Framework**: [TanStack Start](https://tanstack.com/router/v1/docs/start/overview) & [TanStack Router](https://tanstack.com/router)
 - **Styling**: [TailwindCSS v4](https://tailwindcss.com/) & Vanilla CSS
-- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Database & Auth**: [Supabase](https://supabase.com/) (PostgreSQL database, authentication, storage, and realtime channels)
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
 - **Data Fetching**: [TanStack React Query v5](https://tanstack.com/query)
 - **Icons**: [Lucide React](https://lucide.dev/)
+
+---
+
+## 🔒 Security & SEO
+
+- **Supabase Authentication**: Secure session handling and authenticated routes.
+- **Row Level Security (RLS)**: PostgreSQL-level access control on Supabase tables.
+- **SEO-Friendly Architecture**: Proper semantic HTML, structured metadata, automatic dynamic XML sitemaps, and robots.txt.
+- **Schema Markup**: Integrated JSON-LD WebSite structured schema for enhanced rich results in search engines.
 
 ---
 
@@ -82,8 +97,8 @@ bun run build
 ## 📂 Project Structure
 
 ```
-├── .lovable/              # Lovable configuration (ignored/removed for production)
-├── public/                # Static assets (favicons, verification pages)
+├── .vercel/               # Vercel deployment folder
+├── public/                # Static assets (favicons, sitemap, robots.txt)
 ├── src/
 │   ├── components/        # Reusable UI components (Navbar, Footer, ui elements)
 │   ├── data/              # Static data / mocks
@@ -93,7 +108,18 @@ bun run build
 │   ├── services/          # API or backend communication services
 │   ├── store/             # Zustand state management stores (user, products, cart)
 │   └── styles.css         # Global design system CSS tokens and styling
-├── supabase/              # Supabase schema definitions
+├── supabase/              # Supabase schema definitions and SQL scripts
 ├── vite.config.ts         # Vite configuration
 └── wrangler.jsonc         # Wrangler config for Cloudflare deployments
 ```
+
+---
+
+## 👤 Author
+
+**Nitin Kumawat**
+
+Frontend Developer | SEO & Digital Marketing Enthusiast | React Developer
+
+### Skills Demonstrated
+React.js • TypeScript • Supabase • Vite • Tailwind CSS • Authentication • E-Commerce Development • UI/UX Design • State Management • GitHub • Vercel • SEO Optimization • Web Performance • Database Integration • Cloud Deployment
